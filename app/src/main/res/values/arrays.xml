@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="titles">
+        <item>Первая заметка</item>
+        <item>Вторая заметка</item>
+        <item>Третья заметка</item>
+    </string-array>
+
+    <string-array name="date">
+        <item>17.01.2021 11:35</item>
+        <item>18.02.2021 12:40</item>
+        <item>19.03.2021 13:50</item>
+    </string-array>
+
+    <string-array name="description">
+        <item>Здесь хранится первая заметка с информацией</item>
+        <item>Тут хранится вторая заметка с данными</item>
+        <item>В этом месте хранятся данные к третьей заметки</item>
+    </string-array>
+
+</resources>
