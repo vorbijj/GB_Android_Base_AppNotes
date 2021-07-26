@@ -2,4 +2,11 @@
     <string name="app_name">Base_AppNotes</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="search">Search</string>
+    <string name="favorite">Favorite</string>
+    <string name="sort">Sort</string>
+    <string name="text_sort_fragment">Здесь будут отсортированные записи</string>
+    <string name="text_favorite_fragment">Здесь будут избранные записи</string>
+    <string name="empty">Empty</string>
+    <string name="select">Select</string>
 </resources>
