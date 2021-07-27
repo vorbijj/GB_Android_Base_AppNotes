@@ -9,4 +9,7 @@
     <string name="text_favorite_fragment">Здесь будут избранные записи</string>
     <string name="empty">Empty</string>
     <string name="select">Select</string>
+    <string name="question_exit">Выход: Вы уверены?</string>
+    <string name="text_yes">Да</string>
+    <string name="text_no">Нет</string>
 </resources>

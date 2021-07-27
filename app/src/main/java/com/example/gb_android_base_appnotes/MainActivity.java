@@ -7,10 +7,14 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.appcompat.widget.Toolbar;
 
+import android.content.DialogInterface;
 import android.os.Bundle;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
+
+import androidx.appcompat.app.AlertDialog;
 
 
 public class MainActivity extends AppCompatActivity implements ManageFragment {
@@ -20,29 +24,21 @@ public class MainActivity extends AppCompatActivity implements ManageFragment {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        FragmentManager fm = getSupportFragmentManager();
-        Fragment fragment = fm.findFragmentById(R.id.fragment_container);
-
         initToolbar();
 
-        if (fragment == null) {
-            initViewFirst();
-        } else {
-            initView();
-        }
-    }
-
-    private void initViewFirst() {
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-        fragmentTransaction.add(R.id.fragment_container, new TitleFragment());
-        fragmentTransaction.commit();
+        initView();
     }
 
     private void initView() {
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-        fragmentTransaction.replace(R.id.fragment_container, new TitleFragment());
+        Fragment currentFragment = fragmentManager.findFragmentById(R.id.fragment_container);
+
+        if (currentFragment != null) {
+            fragmentTransaction.remove(currentFragment);
+        }
+
+        fragmentTransaction.add(R.id.fragment_container, new TitleFragment());
         fragmentTransaction.commit();
     }
 
@@ -89,9 +85,19 @@ public class MainActivity extends AppCompatActivity implements ManageFragment {
 
     private void addFragment(Fragment fragment){
         FragmentManager fragmentManager = getSupportFragmentManager();
+
+        Fragment currentFragment = fragmentManager.findFragmentById(R.id.fragment_container);
+        String nameFragment = currentFragment.getClass().getCanonicalName();
+        String nameFagmentTitle = new TitleFragment().getClass().getCanonicalName();
+
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-        fragmentTransaction.replace(R.id.fragment_container, fragment);
-        fragmentTransaction.addToBackStack(null);
+
+        fragmentTransaction.remove(currentFragment);
+        fragmentTransaction.add(R.id.fragment_container, fragment);
+
+        if (nameFragment.equals(nameFagmentTitle)) {
+            fragmentTransaction.addToBackStack(null);
+        }
         fragmentTransaction.commit();
     }
 
@@ -101,8 +107,64 @@ public class MainActivity extends AppCompatActivity implements ManageFragment {
 
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-        fragmentTransaction.replace(R.id.fragment_container, detail);
+
+        Fragment currentFragment = fragmentManager.findFragmentById(R.id.fragment_container);
+        fragmentTransaction.remove(currentFragment);
+
+        fragmentTransaction.add(R.id.fragment_container, detail);
         fragmentTransaction.addToBackStack(null);
         fragmentTransaction.commit();
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
+
+            if (getSupportFragmentManager().findFragmentById(R.id.fragment_container).getClass().getCanonicalName()
+                    .equals(new TitleFragment().getClass().getCanonicalName())) {
+                openQuitDialog();
+            }  else {
+                getSupportFragmentManager().popBackStack();
+                removeCurrentFragment();
+                return false;
+            }
+        }
+        return super.onKeyDown(keyCode, event);
+    }
+
+    public void removeCurrentFragment() {
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        Fragment currentFrag =  getSupportFragmentManager().findFragmentById(R.id.fragment_container);
+        String fragName = "NONE";
+
+        if (currentFrag!=null) {
+            fragName = currentFrag.getClass().getSimpleName();
+        }
+
+        if (currentFrag != null) {
+            transaction.remove(currentFrag);
+        }
+        transaction.commit();
+    }
+
+    private void openQuitDialog() {
+        AlertDialog.Builder quitDialog = new AlertDialog.Builder(
+                MainActivity.this);
+        quitDialog.setTitle(R.string.question_exit);
+
+        quitDialog.setPositiveButton(R.string.text_yes, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                finish();
+            }
+        });
+
+        quitDialog.setNegativeButton(R.string.text_no, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+            }
+        });
+
+        quitDialog.show();
     }
 }
