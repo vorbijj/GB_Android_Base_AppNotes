@@ -6,10 +6,20 @@
     <string name="favorite">Favorite</string>
     <string name="sort">Sort</string>
     <string name="text_sort_fragment">Здесь будут отсортированные записи</string>
+    <string name="text_settings_fragment">Здесь будут настройки приложения</string>
     <string name="text_favorite_fragment">Здесь будут избранные записи</string>
     <string name="empty">Empty</string>
     <string name="select">Select</string>
     <string name="question_exit">Выход: Вы уверены?</string>
     <string name="text_yes">Да</string>
     <string name="text_no">Нет</string>
+    <string name="about">About</string>
+    <string name="settings">Settings</string>
+    <string name="main">Main</string>
+    <string name="fragment_navigation">Fragment navigation</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="text_about_fragment_title">Android Base App Notes</string>
+    <string name="text_about_fragment_subtitle">With the support of GeekBrains.ru</string>
+    <string name="text_about_fragment_year">2021</string>
 </resources>
