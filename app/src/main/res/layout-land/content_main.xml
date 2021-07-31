@@ -5,17 +5,18 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="horizontal"
-    tools:context=".MainActivity">
+    tools:context=".MainActivity"
+    tools:showIn="@layout/content_main"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-    <fragment
-        android:id="@+id/title"
-        android:name="com.example.gb_android_base_appnotes.TitleFragment"
+    <FrameLayout
+        android:id="@+id/fragment_container"
         android:layout_width="0px"
         android:layout_height="match_parent"
         android:layout_weight="1"/>
 
     <FrameLayout
-        android:id="@+id/note"
+        android:id="@+id/fragment_note"
         android:layout_width="0px"
         android:layout_height="match_parent"
         android:layout_weight="1" />
