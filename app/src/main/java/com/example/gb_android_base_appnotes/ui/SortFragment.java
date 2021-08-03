@@ -1,4 +1,4 @@
-package com.example.gb_android_base_appnotes;
+package com.example.gb_android_base_appnotes.ui;
 
 import android.content.Context;
 import android.content.res.Configuration;
@@ -17,6 +17,9 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
+
+import com.example.gb_android_base_appnotes.R;
+import com.example.gb_android_base_appnotes.ui.EmptyFragment;
 
 public class SortFragment extends Fragment {
     private boolean isLandscape;

@@ -1,4 +1,4 @@
-package com.example.gb_android_base_appnotes;
+package com.example.gb_android_base_appnotes.ui;
 
 import android.content.Context;
 import android.content.res.Configuration;
@@ -13,6 +13,8 @@ import androidx.fragment.app.FragmentTransaction;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+
+import com.example.gb_android_base_appnotes.R;
 
 public class AboutFragment extends Fragment {
     private boolean isLandscape;

@@ -1,4 +1,4 @@
-package com.example.gb_android_base_appnotes;
+package com.example.gb_android_base_appnotes.ui;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -10,6 +10,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
+import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -18,14 +19,17 @@ import android.view.View;
 import android.view.ViewGroup;
 
 
-import com.example.gb_android_base_appnotes.ui.NoteAdapter;
+import com.example.gb_android_base_appnotes.R;
+import com.example.gb_android_base_appnotes.data.CardNote;
+import com.example.gb_android_base_appnotes.data.CardsSource;
+import com.example.gb_android_base_appnotes.data.CardsSourceImpl;
 
 public class TitleFragment extends Fragment {
     public static final String SHARED_PREFERENCE_NAME = "SaveSelection";
     public static final String SHARED_PREFERENCE_INDEX = "IndexNote";
     public static final String CURRENT_NOTE = "CurrentNote";
     public static int INDEX_NOTE;
-    private Note currentNote;
+    private CardNote currentCardNote;
     private boolean isLandscape;
     private ManageFragment manFrag;
 
@@ -37,7 +41,7 @@ public class TitleFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_title, container, false);
         RecyclerView recyclerView = view.findViewById(R.id.recycler_view_lines);
-        String[] data = getResources().getStringArray(R.array.titles);
+        CardsSource data = new CardsSourceImpl(getResources()).init();
         initRecyclerView(recyclerView, data);
         return view;
     }
@@ -48,7 +52,7 @@ public class TitleFragment extends Fragment {
 
     }
 
-    private void initRecyclerView(RecyclerView recyclerView, String[] data) {
+    private void initRecyclerView(RecyclerView recyclerView, CardsSource data) {
         recyclerView.setHasFixedSize(true);
 
         LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
@@ -57,13 +61,19 @@ public class TitleFragment extends Fragment {
         final NoteAdapter adapter = new NoteAdapter(data);
         recyclerView.setAdapter(adapter);
 
+        DividerItemDecoration itemDecoration = new DividerItemDecoration(getContext(),
+                LinearLayoutManager.VERTICAL);
+        itemDecoration.setDrawable(getResources().getDrawable(R.drawable.separator));
+        recyclerView.addItemDecoration(itemDecoration);
+
+
         adapter.SetOnItemClickListener(new NoteAdapter.OnItemClickListener(){
             public void onItemClick(View view, int index) {
-                currentNote = new Note(index,
+                currentCardNote = new CardNote(index,
                         getResources().getStringArray(R.array.titles)[index],
                         getResources().getStringArray(R.array.date)[index],
-                        getResources().getStringArray(R.array.description)[index]);
-                showNote(currentNote);
+                        getResources().getStringArray(R.array.description)[index],false);
+                showNote(currentCardNote);
             }
         });
     }
@@ -79,7 +89,7 @@ public class TitleFragment extends Fragment {
 
     @Override
     public void onSaveInstanceState(@NonNull Bundle outState) {
-        outState.putParcelable(CURRENT_NOTE, currentNote);
+        outState.putParcelable(CURRENT_NOTE, currentCardNote);
         super.onSaveInstanceState(outState);
     }
 
@@ -88,33 +98,34 @@ public class TitleFragment extends Fragment {
         super.onViewStateRestored(savedInstanceState);
 
         if (savedInstanceState != null) {
-            currentNote = savedInstanceState.getParcelable(CURRENT_NOTE);
+            currentCardNote = savedInstanceState.getParcelable(CURRENT_NOTE);
         } else {
-            currentNote = new Note (0,
+            currentCardNote = new CardNote(0,
                     getResources().getStringArray(R.array.titles)[0],
                     getResources().getStringArray(R.array.date)[0],
-                    getResources().getStringArray(R.array.description)[0]);
+                    getResources().getStringArray(R.array.description)[0],
+                    false);
         }
 
         getSelectionNote();
 
         if (isLandscape){
-            showLandNote(currentNote);
+            showLandNote(currentCardNote);
         }
     }
 
-    private void showNote(Note currentNote) {
+    private void showNote(CardNote currentCardNote) {
         if (isLandscape) {
-            showLandNote(currentNote);
+            showLandNote(currentCardNote);
         } else {
-            showPortNote(currentNote);
+            showPortNote(currentCardNote);
         }
     }
 
-    private void showLandNote(Note currentNote) {
-        NoteFragment detail = NoteFragment.newInstance(currentNote);
+    private void showLandNote(CardNote currentCardNote) {
+        NoteFragment detail = NoteFragment.newInstance(currentCardNote);
 
-        saveSelection(currentNote);
+        saveSelection(currentCardNote);
 
         FragmentManager fragmentManager = requireActivity()
                 .getSupportFragmentManager();
@@ -124,17 +135,17 @@ public class TitleFragment extends Fragment {
         fragmentTransaction.commit();
     }
 
-    private void showPortNote(Note currentNote) {
-        saveSelection(currentNote);
-        manFrag.replaceFragment(currentNote);
+    private void showPortNote(CardNote currentCardNote) {
+        saveSelection(currentCardNote);
+        manFrag.replaceFragment(currentCardNote);
     }
 
-    private void saveSelection(Note currentNote) {
+    private void saveSelection(CardNote currentCardNote) {
         SharedPreferences sharedPref = requireActivity()
                 .getSharedPreferences(SHARED_PREFERENCE_NAME, Context.MODE_PRIVATE);
 
         SharedPreferences.Editor editor = sharedPref.edit();
-        editor.putInt(SHARED_PREFERENCE_INDEX, currentNote.getIndexNote());
+        editor.putInt(SHARED_PREFERENCE_INDEX, currentCardNote.getIndexNote());
         editor.commit();
     }
 
@@ -142,13 +153,14 @@ public class TitleFragment extends Fragment {
         SharedPreferences sharedPref = requireActivity()
                 .getSharedPreferences(SHARED_PREFERENCE_NAME, Context.MODE_PRIVATE);
 
-        INDEX_NOTE = sharedPref.getInt(SHARED_PREFERENCE_INDEX, currentNote.getIndexNote());
+        INDEX_NOTE = sharedPref.getInt(SHARED_PREFERENCE_INDEX, currentCardNote.getIndexNote());
 
         if (INDEX_NOTE >= 0) {
-            currentNote = new Note (INDEX_NOTE,
+            currentCardNote = new CardNote(INDEX_NOTE,
                     getResources().getStringArray(R.array.titles)[INDEX_NOTE],
                     getResources().getStringArray(R.array.date)[INDEX_NOTE],
-                    getResources().getStringArray(R.array.description)[INDEX_NOTE]);
+                    getResources().getStringArray(R.array.description)[INDEX_NOTE],
+                    false);
         }
 
     }

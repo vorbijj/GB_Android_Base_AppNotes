@@ -1,4 +1,4 @@
-package com.example.gb_android_base_appnotes;
+package com.example.gb_android_base_appnotes.ui;
 
 import android.os.Bundle;
 
@@ -9,15 +9,18 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.example.gb_android_base_appnotes.R;
+import com.example.gb_android_base_appnotes.data.CardNote;
+
 public class NoteFragment extends Fragment {
 
     public static final String ARG_NOTE = "note";
-    private Note note;
+    private CardNote cardNote;
 
-    public static NoteFragment newInstance(Note note) {
+    public static NoteFragment newInstance(CardNote cardNote) {
         NoteFragment fragment = new NoteFragment();
         Bundle args = new Bundle();
-        args.putParcelable(ARG_NOTE, note);
+        args.putParcelable(ARG_NOTE, cardNote);
         fragment.setArguments(args);
         return fragment;
     }
@@ -26,7 +29,7 @@ public class NoteFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            note = getArguments().getParcelable(ARG_NOTE);
+            cardNote = getArguments().getParcelable(ARG_NOTE);
         }
     }
 
@@ -37,13 +40,13 @@ public class NoteFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_note, container, false);
 
         TextView titleView = view.findViewById(R.id.textView_title);
-        titleView.setText(note.getTitle());
+        titleView.setText(cardNote.getTitle());
 
         TextView timeView = view.findViewById(R.id.textView_date);
-        timeView.setText(note.getDate());
+        timeView.setText(cardNote.getDate());
 
         TextView descriptionView = view.findViewById(R.id.textView_description);
-        descriptionView.setText(note.getDescription());
+        descriptionView.setText(cardNote.getDescription());
 
         return view;
     }
