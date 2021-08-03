@@ -3,7 +3,6 @@ package com.example.gb_android_base_appnotes;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
-import android.graphics.Paint;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -11,12 +10,15 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
-import android.widget.TextView;
+
+
+import com.example.gb_android_base_appnotes.ui.NoteAdapter;
 
 public class TitleFragment extends Fragment {
     public static final String SHARED_PREFERENCE_NAME = "SaveSelection";
@@ -27,38 +29,43 @@ public class TitleFragment extends Fragment {
     private boolean isLandscape;
     private ManageFragment manFrag;
 
+    public static TitleFragment newInstance() {
+        return new TitleFragment();
+    }
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_title, container, false);
+        View view = inflater.inflate(R.layout.fragment_title, container, false);
+        RecyclerView recyclerView = view.findViewById(R.id.recycler_view_lines);
+        String[] data = getResources().getStringArray(R.array.titles);
+        initRecyclerView(recyclerView, data);
+        return view;
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        initlist((LinearLayout) view);
     }
 
-    private void initlist(LinearLayout view) {
+    private void initRecyclerView(RecyclerView recyclerView, String[] data) {
+        recyclerView.setHasFixedSize(true);
 
-        String[] titles = getResources().getStringArray(R.array.titles);
+        LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
+        recyclerView.setLayoutManager(layoutManager);
 
-        for (int i = 0; i < titles.length; i++) {
-            String title = titles[i];
-            TextView tv = new TextView(getContext());
-            tv.setText(title);
-            tv.setTextSize(30);
-            tv.setPaintFlags(Paint.UNDERLINE_TEXT_FLAG);
-            view.addView(tv);
-            final int index = i;
-            tv.setOnClickListener(v -> {
+        final NoteAdapter adapter = new NoteAdapter(data);
+        recyclerView.setAdapter(adapter);
+
+        adapter.SetOnItemClickListener(new NoteAdapter.OnItemClickListener(){
+            public void onItemClick(View view, int index) {
                 currentNote = new Note(index,
                         getResources().getStringArray(R.array.titles)[index],
                         getResources().getStringArray(R.array.date)[index],
                         getResources().getStringArray(R.array.description)[index]);
                 showNote(currentNote);
-            });
-        }
+            }
+        });
     }
 
     @Override
