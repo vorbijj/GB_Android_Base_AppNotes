@@ -19,6 +19,14 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
 
+import com.example.gb_android_base_appnotes.data.CardNote;
+import com.example.gb_android_base_appnotes.ui.AboutFragment;
+import com.example.gb_android_base_appnotes.ui.FavoriteFragment;
+import com.example.gb_android_base_appnotes.ui.ManageFragment;
+import com.example.gb_android_base_appnotes.ui.NoteFragment;
+import com.example.gb_android_base_appnotes.ui.SettingsFragment;
+import com.example.gb_android_base_appnotes.ui.SortFragment;
+import com.example.gb_android_base_appnotes.ui.TitleFragment;
 import com.google.android.material.navigation.NavigationView;
 
 
@@ -153,8 +161,8 @@ public class MainActivity extends AppCompatActivity implements ManageFragment {
     }
 
     @Override
-    public void replaceFragment(Note currentNote) {
-        NoteFragment detail = NoteFragment.newInstance(currentNote);
+    public void replaceFragment(CardNote currentCardNote) {
+        NoteFragment detail = NoteFragment.newInstance(currentCardNote);
 
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
