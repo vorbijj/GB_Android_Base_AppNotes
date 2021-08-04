@@ -22,4 +22,6 @@
     <string name="text_about_fragment_title">Android Base App Notes</string>
     <string name="text_about_fragment_subtitle">With the support of GeekBrains.ru</string>
     <string name="text_about_fragment_year">2021</string>
+    <string name="add">Add</string>
+    <string name="clear">Clear</string>
 </resources>

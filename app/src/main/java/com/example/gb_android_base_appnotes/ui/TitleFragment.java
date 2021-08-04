@@ -15,8 +15,12 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 
 import com.example.gb_android_base_appnotes.R;
@@ -32,6 +36,9 @@ public class TitleFragment extends Fragment {
     private CardNote currentCardNote;
     private boolean isLandscape;
     private ManageFragment manFrag;
+    private CardsSource data;
+    private NoteAdapter adapter;
+    private RecyclerView recyclerView;
 
     public static TitleFragment newInstance() {
         return new TitleFragment();
@@ -41,8 +48,9 @@ public class TitleFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_title, container, false);
         RecyclerView recyclerView = view.findViewById(R.id.recycler_view_lines);
-        CardsSource data = new CardsSourceImpl(getResources()).init();
-        initRecyclerView(recyclerView, data);
+        data = new CardsSourceImpl(getResources()).init();
+        initView(view);
+        setHasOptionsMenu(true);
         return view;
     }
 
@@ -52,13 +60,13 @@ public class TitleFragment extends Fragment {
 
     }
 
-    private void initRecyclerView(RecyclerView recyclerView, CardsSource data) {
+    private void initRecyclerView() {
         recyclerView.setHasFixedSize(true);
 
         LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
         recyclerView.setLayoutManager(layoutManager);
 
-        final NoteAdapter adapter = new NoteAdapter(data);
+        adapter = new NoteAdapter(data);
         recyclerView.setAdapter(adapter);
 
         DividerItemDecoration itemDecoration = new DividerItemDecoration(getContext(),
@@ -85,6 +93,36 @@ public class TitleFragment extends Fragment {
         manFrag =  (ManageFragment) requireActivity();
         isLandscape = getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE;
 
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.main_cards, menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        switch (item.getItemId()){
+            case R.id.action_add:
+                data.addCardNote(new CardNote(data.size() - 1, "Заголовок " + data.size(),
+                        "Дата " + data.size(),
+                        "Описание " + data.size(),
+                        false));
+                adapter.notifyItemInserted(data.size() - 1);
+                recyclerView.scrollToPosition(data.size() - 1);
+                return true;
+            case R.id.action_clear:
+                data.clearCardNote();
+                adapter.notifyDataSetChanged();
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    private void initView(View view) {
+        recyclerView = view.findViewById(R.id.recycler_view_lines);
+        data = new CardsSourceImpl(getResources()).init();
+        initRecyclerView();
     }
 
     @Override
