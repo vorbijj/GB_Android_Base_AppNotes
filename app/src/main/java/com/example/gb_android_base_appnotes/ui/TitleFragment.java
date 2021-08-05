@@ -10,17 +10,18 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
+import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 
 import com.example.gb_android_base_appnotes.R;
@@ -29,6 +30,7 @@ import com.example.gb_android_base_appnotes.data.CardsSource;
 import com.example.gb_android_base_appnotes.data.CardsSourceImpl;
 
 public class TitleFragment extends Fragment {
+    private static final int MY_DEFAULT_DURATION = 1000;
     public static final String SHARED_PREFERENCE_NAME = "SaveSelection";
     public static final String SHARED_PREFERENCE_INDEX = "IndexNote";
     public static final String CURRENT_NOTE = "CurrentNote";
@@ -66,7 +68,7 @@ public class TitleFragment extends Fragment {
         LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
         recyclerView.setLayoutManager(layoutManager);
 
-        adapter = new NoteAdapter(data);
+        adapter = new NoteAdapter(data, this);
         recyclerView.setAdapter(adapter);
 
         DividerItemDecoration itemDecoration = new DividerItemDecoration(getContext(),
@@ -74,6 +76,10 @@ public class TitleFragment extends Fragment {
         itemDecoration.setDrawable(getResources().getDrawable(R.drawable.separator));
         recyclerView.addItemDecoration(itemDecoration);
 
+        DefaultItemAnimator animator = new DefaultItemAnimator();
+        animator.setAddDuration(MY_DEFAULT_DURATION);
+        animator.setRemoveDuration(MY_DEFAULT_DURATION);
+        recyclerView.setItemAnimator(animator);
 
         adapter.SetOnItemClickListener(new NoteAdapter.OnItemClickListener(){
             public void onItemClick(View view, int index) {
@@ -109,7 +115,8 @@ public class TitleFragment extends Fragment {
                         "Описание " + data.size(),
                         false));
                 adapter.notifyItemInserted(data.size() - 1);
-                recyclerView.scrollToPosition(data.size() - 1);
+//                recyclerView.scrollToPosition(data.size() - 1);
+                recyclerView.smoothScrollToPosition(data.size() - 1);
                 return true;
             case R.id.action_clear:
                 data.clearCardNote();
@@ -150,6 +157,35 @@ public class TitleFragment extends Fragment {
         if (isLandscape){
             showLandNote(currentCardNote);
         }
+    }
+
+    @Override
+    public void onCreateContextMenu(@NonNull ContextMenu menu, @NonNull View v,
+                                    @Nullable ContextMenu.ContextMenuInfo menuInfo) {
+        super.onCreateContextMenu(menu, v, menuInfo);
+        MenuInflater inflater = requireActivity().getMenuInflater();
+        inflater.inflate(R.menu.card_menu, menu);
+    }
+
+    @Override
+    public boolean onContextItemSelected(@NonNull MenuItem item) {
+        int position = adapter.getMenuPosition();
+        switch(item.getItemId()) {
+            case R.id.action_update:
+                data.updateCardNote(position,
+                        new CardNote(position,"Кадр " + position,
+                                "Дата " + position,
+                                "Описание " + position,
+                                false));
+                adapter.notifyItemChanged(position);
+
+                return true;
+            case R.id.action_delete:
+                data.deleteCardNote(position);
+                adapter.notifyItemRemoved(position);
+                return true;
+        }
+        return super.onContextItemSelected(item);
     }
 
     private void showNote(CardNote currentCardNote) {
