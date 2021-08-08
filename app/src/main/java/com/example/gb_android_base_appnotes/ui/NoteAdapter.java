@@ -15,6 +15,8 @@ import com.example.gb_android_base_appnotes.R;
 import com.example.gb_android_base_appnotes.data.CardNote;
 import com.example.gb_android_base_appnotes.data.CardsSource;
 
+import java.text.SimpleDateFormat;
+
 public class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.ViewHolder> {
 
     private final static String TAG = "NoteAdapter";
@@ -97,8 +99,8 @@ public class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.ViewHolder> {
 
         public void setData(CardNote cardNote) {
             title.setText(cardNote.getTitle());
-            dateTime.setText(cardNote.getDate());
-            like.setChecked(cardNote.getLike());
+            dateTime.setText(new SimpleDateFormat("dd-MM-yy").format(cardNote.getDate()));
+            like.setChecked(cardNote.isLike());
         }
     }
 }

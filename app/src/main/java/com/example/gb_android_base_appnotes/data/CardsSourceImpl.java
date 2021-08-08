@@ -5,6 +5,7 @@ import android.content.res.Resources;
 import com.example.gb_android_base_appnotes.R;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 public class CardsSourceImpl implements CardsSource{
@@ -18,11 +19,10 @@ public class CardsSourceImpl implements CardsSource{
 
     public CardsSourceImpl init() {
         String[] title = resources.getStringArray(R.array.titles);
-        String[] date = resources.getStringArray(R.array.date);
         String[] description = resources.getStringArray(R.array.description);
 
         for (int i = 0; i < title.length; i++) {
-            dataSource.add(new CardNote(i, title[i], date[i], description[i], false));
+            dataSource.add(new CardNote(i, title[i], Calendar.getInstance().getTime(), description[i], false));
         }
         return this;
     }
