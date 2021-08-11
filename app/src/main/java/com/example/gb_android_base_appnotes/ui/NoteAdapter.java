@@ -8,20 +8,26 @@ import android.widget.CheckBox;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.gb_android_base_appnotes.R;
 import com.example.gb_android_base_appnotes.data.CardNote;
 import com.example.gb_android_base_appnotes.data.CardsSource;
 
+import java.text.SimpleDateFormat;
+
 public class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.ViewHolder> {
 
     private final static String TAG = "NoteAdapter";
     private CardsSource dataSource;
+    private final Fragment fragment;
     private OnItemClickListener itemClickListener;
+    private int menuPosition;
 
-    public NoteAdapter(CardsSource dataSource) {
+    public NoteAdapter(CardsSource dataSource, Fragment fragment) {
         this.dataSource = dataSource;
+        this.fragment = fragment;
     }
 
     @NonNull
@@ -43,6 +49,10 @@ public class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.ViewHolder> {
         return dataSource.size();
     }
 
+    public int getMenuPosition() {
+        return menuPosition;
+    }
+
     public void SetOnItemClickListener(OnItemClickListener itemClickListener){
         this.itemClickListener = itemClickListener;
     }
@@ -62,6 +72,8 @@ public class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.ViewHolder> {
             dateTime = itemView.findViewById(R.id.date_time);
             like = itemView.findViewById(R.id.like);
 
+            registerContextMenu(itemView);
+
             title.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -72,10 +84,23 @@ public class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.ViewHolder> {
             });
         }
 
+        private void registerContextMenu(@NonNull View itemView) {
+            if (fragment != null){
+                itemView.setOnLongClickListener(new View.OnLongClickListener() {
+                    @Override
+                    public boolean onLongClick(View v) {
+                        menuPosition = getLayoutPosition();
+                        return false;
+                    }
+                });
+                fragment.registerForContextMenu(itemView);
+            }
+        }
+
         public void setData(CardNote cardNote) {
             title.setText(cardNote.getTitle());
-            dateTime.setText(cardNote.getDate());
-            like.setChecked(cardNote.getLike());
+            dateTime.setText(new SimpleDateFormat("dd-MM-yy").format(cardNote.getDate()));
+            like.setChecked(cardNote.isLike());
         }
     }
 }

@@ -3,14 +3,16 @@ package com.example.gb_android_base_appnotes.data;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.util.Date;
+
 public class CardNote implements Parcelable {
     private int indexNote;
     private String title;
-    private String date;
+    private Date date;
     private String description;
     private boolean like;
 
-    public CardNote(int indexNote, String title, String date, String description, boolean like) {
+    public CardNote(int indexNote, String title, Date date, String description, boolean like) {
         this.indexNote = indexNote;
         this.title = title;
         this.date = date;
@@ -21,7 +23,7 @@ public class CardNote implements Parcelable {
     protected CardNote(Parcel in) {
         indexNote = in.readInt();
         title = in.readString();
-        date = in.readString();
+        date = new Date(in.readLong());
         description = in.readString();
         like = in.readByte() != 0;
     }
@@ -30,7 +32,7 @@ public class CardNote implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(indexNote);
         dest.writeString(title);
-        dest.writeString(date);
+        dest.writeLong(date.getTime());
         dest.writeString(description);
         dest.writeByte((byte) (like ? 1 : 0));
     }
@@ -52,6 +54,10 @@ public class CardNote implements Parcelable {
         }
     };
 
+    public boolean isLike() {
+        return like;
+    }
+
     public int getIndexNote() {
         return indexNote;
     }
@@ -60,7 +66,7 @@ public class CardNote implements Parcelable {
         return title;
     }
 
-    public String getDate() {
+    public Date getDate() {
         return date;
     }
 
@@ -68,7 +74,4 @@ public class CardNote implements Parcelable {
         return description;
     }
 
-    public boolean getLike() {
-        return like;
-    }
 }

@@ -12,6 +12,8 @@ import android.widget.TextView;
 import com.example.gb_android_base_appnotes.R;
 import com.example.gb_android_base_appnotes.data.CardNote;
 
+import java.text.SimpleDateFormat;
+
 public class NoteFragment extends Fragment {
 
     public static final String ARG_NOTE = "note";
@@ -43,7 +45,7 @@ public class NoteFragment extends Fragment {
         titleView.setText(cardNote.getTitle());
 
         TextView timeView = view.findViewById(R.id.textView_date);
-        timeView.setText(cardNote.getDate());
+        timeView.setText(new SimpleDateFormat("dd-MM-yy").format(cardNote.getDate()));
 
         TextView descriptionView = view.findViewById(R.id.textView_description);
         descriptionView.setText(cardNote.getDescription());

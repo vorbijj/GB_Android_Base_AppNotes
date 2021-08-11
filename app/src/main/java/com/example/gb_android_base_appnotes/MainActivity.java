@@ -20,6 +20,7 @@ import android.widget.Toast;
 import androidx.appcompat.app.AlertDialog;
 
 import com.example.gb_android_base_appnotes.data.CardNote;
+import com.example.gb_android_base_appnotes.observe.Publisher;
 import com.example.gb_android_base_appnotes.ui.AboutFragment;
 import com.example.gb_android_base_appnotes.ui.FavoriteFragment;
 import com.example.gb_android_base_appnotes.ui.ManageFragment;
@@ -32,16 +33,22 @@ import com.google.android.material.navigation.NavigationView;
 
 public class MainActivity extends AppCompatActivity implements ManageFragment {
 
+    private Navigation navigation;
+    private Publisher publisher = new Publisher();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        navigation = new Navigation(getSupportFragmentManager());
+
         Toolbar toolbar = initToolbar();
 
         initDrawer(toolbar);
 
-        initView();
+        getNavigation().addFragment(TitleFragment.newInstance(), false);
+
     }
 
     private void initDrawer(Toolbar toolbar) {
@@ -85,19 +92,6 @@ public class MainActivity extends AppCompatActivity implements ManageFragment {
             }
             fm.popBackStack();
         }
-    }
-
-    private void initView() {
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-        Fragment currentFragment = fragmentManager.findFragmentById(R.id.fragment_container);
-
-        if (currentFragment != null) {
-            fragmentTransaction.remove(currentFragment);
-        }
-
-        fragmentTransaction.add(R.id.fragment_container, new TitleFragment());
-        fragmentTransaction.commit();
     }
 
     private Toolbar initToolbar() {
@@ -226,4 +220,13 @@ public class MainActivity extends AppCompatActivity implements ManageFragment {
 
         quitDialog.show();
     }
+
+    public Navigation getNavigation() {
+        return navigation;
+    }
+
+    public Publisher getPublisher() {
+        return publisher;
+    }
+
 }
