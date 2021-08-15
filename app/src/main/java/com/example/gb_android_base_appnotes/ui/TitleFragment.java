@@ -22,6 +22,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 
 import com.example.gb_android_base_appnotes.MainActivity;
@@ -29,42 +30,40 @@ import com.example.gb_android_base_appnotes.Navigation;
 import com.example.gb_android_base_appnotes.R;
 import com.example.gb_android_base_appnotes.data.CardNote;
 import com.example.gb_android_base_appnotes.data.CardsSource;
+import com.example.gb_android_base_appnotes.data.CardsSourceFirebaseImpl;
 import com.example.gb_android_base_appnotes.data.CardsSourceImpl;
+import com.example.gb_android_base_appnotes.data.CardsSourceResponse;
 import com.example.gb_android_base_appnotes.observe.Observer;
 import com.example.gb_android_base_appnotes.observe.Publisher;
 
 public class TitleFragment extends Fragment {
     private static final int MY_DEFAULT_DURATION = 1000;
-    public static final String SHARED_PREFERENCE_NAME = "SaveSelection";
-    public static final String SHARED_PREFERENCE_INDEX = "IndexNote";
     public static final String CURRENT_NOTE = "CurrentNote";
-    public static int INDEX_NOTE;
     private CardNote currentCardNote;
     private boolean isLandscape;
-    private ManageFragment manFrag;
     private CardsSource data;
     private NoteAdapter adapter;
-    private RecyclerView recyclerView;
-    private Navigation navigation;
     private Publisher publisher;
-    private boolean moveToLastPosition;
+
+    private boolean moveToFirstPosition;
 
     public static TitleFragment newInstance() {
         return new TitleFragment();
     }
 
     @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        data = new CardsSourceImpl(getResources()).init();
-    }
-
-    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_title, container, false);
-        RecyclerView recyclerView = view.findViewById(R.id.recycler_view_lines);
-        initView(view);
         setHasOptionsMenu(true);
+        initRecyclerView(view);
+
+        data = new CardsSourceFirebaseImpl().init(new CardsSourceResponse() {
+            @Override
+            public void initialized(CardsSource cardsNote) {
+                adapter.notifyDataSetChanged();
+            }
+        });
+        adapter.setDataSource(data);
         return view;
     }
 
@@ -74,13 +73,14 @@ public class TitleFragment extends Fragment {
 
     }
 
-    private void initRecyclerView() {
+    private void initRecyclerView(View view) {
+        RecyclerView recyclerView = view.findViewById(R.id.recycler_view_lines);
         recyclerView.setHasFixedSize(true);
 
         LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
         recyclerView.setLayoutManager(layoutManager);
 
-        adapter = new NoteAdapter(data, this);
+        adapter = new NoteAdapter(this);
         recyclerView.setAdapter(adapter);
 
         DividerItemDecoration itemDecoration = new DividerItemDecoration(getContext(),
@@ -93,18 +93,17 @@ public class TitleFragment extends Fragment {
         animator.setRemoveDuration(MY_DEFAULT_DURATION);
         recyclerView.setItemAnimator(animator);
 
-        if (moveToLastPosition){
-            recyclerView.smoothScrollToPosition(data.size() - 1);
-            moveToLastPosition = false;
+        if (moveToFirstPosition && data.size() > 0){
+            recyclerView.scrollToPosition(0);
+            moveToFirstPosition = false;
         }
 
         adapter.SetOnItemClickListener(new NoteAdapter.OnItemClickListener(){
-            public void onItemClick(View view, int index) {
-                currentCardNote = new CardNote(index,
-                        data.getNoteData(index).getTitle(),
-                        data.getNoteData(index).getDate(),
-                        data.getNoteData(index).getDescription(),
-                        data.getNoteData(index).isLike());
+            public void onItemClick(View view, int position) {
+                currentCardNote = new CardNote(data.getNoteData(position).getTitle(),
+                        data.getNoteData(position).getDate(),
+                        data.getNoteData(position).getDescription(),
+                        data.getNoteData(position).isLike());
                 showNote(currentCardNote);
             }
         });
@@ -115,16 +114,14 @@ public class TitleFragment extends Fragment {
         super.onAttach(context);
 
         MainActivity activity = (MainActivity)context;
-        navigation = activity.getNavigation();
         publisher = activity.getPublisher();
 
-        manFrag =  (ManageFragment) requireActivity();
         isLandscape = getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE;
 
     }
 
+    @Override
     public void onDetach() {
-        navigation = null;
         publisher = null;
         super.onDetach();
     }
@@ -136,32 +133,7 @@ public class TitleFragment extends Fragment {
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        switch (item.getItemId()){
-            case R.id.action_add:
-                navigation.addFragment(CardFragment.newInstance(), true);
-                publisher.subscribe(new Observer() {
-                    @Override
-                    public void updateCardNote(CardNote cardNote) {
-                        data.addCardNote(cardNote);
-                        adapter.notifyItemInserted(data.size() - 1);
-                        moveToLastPosition = true;
-                    }
-                });
-                showEmptyNote();
-                return true;
-            case R.id.action_clear:
-                data.clearCardNote();
-                adapter.notifyDataSetChanged();
-                showEmptyNote();
-                return true;
-        }
-        return super.onOptionsItemSelected(item);
-    }
-
-    private void initView(View view) {
-        recyclerView = view.findViewById(R.id.recycler_view_lines);
-        data = new CardsSourceImpl(getResources()).init();
-        initRecyclerView();
+        return onItemSelected(item.getItemId()) || super.onOptionsItemSelected(item);
     }
 
     @Override
@@ -176,16 +148,7 @@ public class TitleFragment extends Fragment {
 
         if (savedInstanceState != null) {
             currentCardNote = savedInstanceState.getParcelable(CURRENT_NOTE);
-        } else {
-            currentCardNote = new CardNote(0,
-                    data.getNoteData(0).getTitle(),
-                    data.getNoteData(0).getDate(),
-                    data.getNoteData(0).getDescription(),
-                    data.getNoteData(0).isLike());
         }
-
-//        getSelectionNote();
-
         if (isLandscape){
             showLandNote(currentCardNote);
         }
@@ -201,26 +164,7 @@ public class TitleFragment extends Fragment {
 
     @Override
     public boolean onContextItemSelected(@NonNull MenuItem item) {
-        int position = adapter.getMenuPosition();
-        switch(item.getItemId()) {
-            case R.id.action_update:
-                navigation.addFragment(CardFragment.newInstance(data.getNoteData(position)), true);
-                publisher.subscribe(new Observer() {
-                    @Override
-                    public void updateCardNote(CardNote cardNote) {
-                        data.updateCardNote(position, cardNote);
-                        adapter.notifyItemChanged(position);
-                    }
-                });
-                showEmptyNote();
-                return true;
-            case R.id.action_delete:
-                data.deleteCardNote(position);
-                adapter.notifyItemRemoved(position);
-                showEmptyNote();
-                return true;
-        }
-        return super.onContextItemSelected(item);
+        return onItemSelected(item.getItemId()) || super.onContextItemSelected(item);
     }
 
     private void showNote(CardNote currentCardNote) {
@@ -234,8 +178,6 @@ public class TitleFragment extends Fragment {
     private void showLandNote(CardNote currentCardNote) {
         NoteFragment detail = NoteFragment.newInstance(currentCardNote);
 
-//        saveSelection(currentCardNote);
-
         FragmentManager fragmentManager = requireActivity()
                 .getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
@@ -245,12 +187,10 @@ public class TitleFragment extends Fragment {
     }
 
     private void showPortNote(CardNote currentCardNote) {
-//        saveSelection(currentCardNote);
-        manFrag.replaceFragment(currentCardNote);
+        replaceFragment(currentCardNote);
     }
 
     private void showEmptyNote() {
-
         FragmentManager fragmentManager = requireActivity()
                 .getSupportFragmentManager();
         Fragment detail = fragmentManager.findFragmentById(R.id.fragment_note);
@@ -262,29 +202,80 @@ public class TitleFragment extends Fragment {
         }
     }
 
-    private void saveSelection(CardNote currentCardNote) {
-        SharedPreferences sharedPref = requireActivity()
-                .getSharedPreferences(SHARED_PREFERENCE_NAME, Context.MODE_PRIVATE);
-
-        SharedPreferences.Editor editor = sharedPref.edit();
-        editor.putInt(SHARED_PREFERENCE_INDEX, currentCardNote.getIndexNote());
-        editor.commit();
+    private boolean onItemSelected(int menuItem) {
+        switch (menuItem) {
+            case R.id.action_add:
+               addFragment(CardFragment.newInstance(), true);
+                publisher.subscribe(new Observer() {
+                    @Override
+                    public void updateCardNote(CardNote cardNote) {
+                        data.addCardNote(cardNote);
+                        adapter.notifyItemInserted(data.size() - 1);
+                        moveToFirstPosition = true;
+                    }
+                });
+                return true;
+            case R.id.action_update:
+                int updatePosition = adapter.getMenuPosition();
+                addFragment(CardFragment.newInstance(data.getNoteData(updatePosition)), true);
+                publisher.subscribe(new Observer() {
+                    @Override
+                    public void updateCardNote(CardNote cardNote) {
+                        data.updateCardNote(updatePosition, cardNote);
+                        adapter.notifyItemChanged(updatePosition);
+                    }
+                });
+                showEmptyNote();
+                return true;
+            case R.id.action_delete:
+                int deletePosition = adapter.getMenuPosition();
+                data.deleteCardNote(deletePosition);
+                adapter.notifyItemRemoved(deletePosition);
+                showEmptyNote();
+                return true;
+            case R.id.action_clear:
+                data.clearCardNote();
+                adapter.notifyDataSetChanged();
+                showEmptyNote();
+                return true;
+        }
+        return false;
     }
 
-    private void getSelectionNote() {
-        SharedPreferences sharedPref = requireActivity()
-                .getSharedPreferences(SHARED_PREFERENCE_NAME, Context.MODE_PRIVATE);
+    private void addFragment(Fragment fragment, boolean useBackStack){
+        FragmentManager fragmentManager = requireActivity().getSupportFragmentManager();
+        Fragment currentFragment = fragmentManager.findFragmentById(R.id.fragment_container);
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
 
-        INDEX_NOTE = sharedPref.getInt(SHARED_PREFERENCE_INDEX, currentCardNote.getIndexNote());
+        if (currentFragment != null) {
+            fragmentTransaction.remove(currentFragment);
+        }
+        fragmentTransaction.add(R.id.fragment_container, fragment);
 
-        if (INDEX_NOTE >= 0) {
-            currentCardNote = new CardNote(INDEX_NOTE,
-                    data.getNoteData(INDEX_NOTE).getTitle(),
-                    data.getNoteData(INDEX_NOTE).getDate(),
-                    data.getNoteData(INDEX_NOTE).getDescription(),
-                    data.getNoteData(INDEX_NOTE).isLike());
+        if (useBackStack) {
+            int count = fragmentManager.getBackStackEntryCount();
+            if (count == 0) {
+                fragmentTransaction.addToBackStack(null);
+            }
+        }
+        fragmentTransaction.commit();
+    }
+
+    private void replaceFragment(CardNote currentCardNote) {
+        FragmentManager fragmentManager = requireActivity().getSupportFragmentManager();
+        NoteFragment detail = NoteFragment.newInstance(currentCardNote);
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        Fragment currentFragment = fragmentManager.findFragmentById(R.id.fragment_container);
+
+        fragmentTransaction.remove(currentFragment);
+
+        fragmentTransaction.add(R.id.fragment_container, detail);
+
+        int count = fragmentManager.getBackStackEntryCount();
+        if (count == 0) {
+            fragmentTransaction.addToBackStack(null);
         }
 
+        fragmentTransaction.commit();
     }
-
 }

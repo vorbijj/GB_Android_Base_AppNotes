@@ -17,6 +17,7 @@ import java.text.SimpleDateFormat;
 public class NoteFragment extends Fragment {
 
     public static final String ARG_NOTE = "note";
+    private static final String EMPTY_STR = "";
     private CardNote cardNote;
 
     public static NoteFragment newInstance(CardNote cardNote) {
@@ -38,18 +39,26 @@ public class NoteFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-
         View view = inflater.inflate(R.layout.fragment_note, container, false);
 
         TextView titleView = view.findViewById(R.id.textView_title);
-        titleView.setText(cardNote.getTitle());
+        if (cardNote != null) {
+            titleView.setText(cardNote.getTitle());
 
-        TextView timeView = view.findViewById(R.id.textView_date);
-        timeView.setText(new SimpleDateFormat("dd-MM-yy").format(cardNote.getDate()));
+            TextView timeView = view.findViewById(R.id.textView_date);
+            timeView.setText(new SimpleDateFormat("dd-MM-yy").format(cardNote.getDate()));
 
-        TextView descriptionView = view.findViewById(R.id.textView_description);
-        descriptionView.setText(cardNote.getDescription());
+            TextView descriptionView = view.findViewById(R.id.textView_description);
+            descriptionView.setText(cardNote.getDescription());
+        } else {
+            titleView.setText(EMPTY_STR);
 
+            TextView timeView = view.findViewById(R.id.textView_date);
+            timeView.setText(EMPTY_STR);
+
+            TextView descriptionView = view.findViewById(R.id.textView_description);
+            descriptionView.setText(EMPTY_STR);
+        }
         return view;
     }
 }
