@@ -19,19 +19,16 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
 
-import com.example.gb_android_base_appnotes.data.CardNote;
 import com.example.gb_android_base_appnotes.observe.Publisher;
 import com.example.gb_android_base_appnotes.ui.AboutFragment;
 import com.example.gb_android_base_appnotes.ui.FavoriteFragment;
-import com.example.gb_android_base_appnotes.ui.ManageFragment;
-import com.example.gb_android_base_appnotes.ui.NoteFragment;
 import com.example.gb_android_base_appnotes.ui.SettingsFragment;
 import com.example.gb_android_base_appnotes.ui.SortFragment;
 import com.example.gb_android_base_appnotes.ui.TitleFragment;
 import com.google.android.material.navigation.NavigationView;
 
 
-public class MainActivity extends AppCompatActivity implements ManageFragment {
+public class MainActivity extends AppCompatActivity{
 
     private Navigation navigation;
     private Publisher publisher = new Publisher();
@@ -48,7 +45,6 @@ public class MainActivity extends AppCompatActivity implements ManageFragment {
         initDrawer(toolbar);
 
         getNavigation().addFragment(TitleFragment.newInstance(), false);
-
     }
 
     private void initDrawer(Toolbar toolbar) {
@@ -68,30 +64,18 @@ public class MainActivity extends AppCompatActivity implements ManageFragment {
 
                 switch(id){
                     case R.id.action_main:
-                        toBackMainFragment();
+                        navigation.toBackMainFragment();
                         return true;
                     case R.id.action_settings:
-                        addFragment(new SettingsFragment());
+                        navigation.addFragmentSecondary(new SettingsFragment());
                         return true;
                     case R.id.action_about:
-                        addFragment(new AboutFragment());
+                        navigation.addFragmentSecondary(new AboutFragment());
                         return true;
                 }
                 return false;
             }
         });
-    }
-
-    private void toBackMainFragment() {
-        FragmentManager fm = getSupportFragmentManager();
-        Fragment fragment = fm.findFragmentById(R.id.fragment_container);
-        int count = fm.getBackStackEntryCount();
-        if (count > 0) {
-            if (fragment != null) {
-                fm.beginTransaction().remove(fragment).commit();
-            }
-            fm.popBackStack();
-        }
     }
 
     private Toolbar initToolbar() {
@@ -105,10 +89,10 @@ public class MainActivity extends AppCompatActivity implements ManageFragment {
         int id = item.getItemId();
         switch(id){
             case R.id.action_sort:
-                addFragment(new SortFragment());
+                navigation.addFragmentSecondary(new SortFragment());
                 return true;
             case R.id.action_favorite:
-                addFragment(new FavoriteFragment());
+                navigation.addFragmentSecondary(new FavoriteFragment());
                 return true;
         }
         return super.onOptionsItemSelected(item);
@@ -136,39 +120,6 @@ public class MainActivity extends AppCompatActivity implements ManageFragment {
         return true;
     }
 
-    private void addFragment(Fragment fragment){
-        FragmentManager fragmentManager = getSupportFragmentManager();
-
-        Fragment currentFragment = fragmentManager.findFragmentById(R.id.fragment_container);
-        String nameFragment = currentFragment.getClass().getCanonicalName();
-        String nameFagmentTitle = new TitleFragment().getClass().getCanonicalName();
-
-        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-
-        fragmentTransaction.remove(currentFragment);
-        fragmentTransaction.add(R.id.fragment_container, fragment);
-
-        if (nameFragment.equals(nameFagmentTitle)) {
-            fragmentTransaction.addToBackStack(null);
-        }
-        fragmentTransaction.commit();
-    }
-
-    @Override
-    public void replaceFragment(CardNote currentCardNote) {
-        NoteFragment detail = NoteFragment.newInstance(currentCardNote);
-
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-
-        Fragment currentFragment = fragmentManager.findFragmentById(R.id.fragment_container);
-        fragmentTransaction.remove(currentFragment);
-
-        fragmentTransaction.add(R.id.fragment_container, detail);
-        fragmentTransaction.addToBackStack(null);
-        fragmentTransaction.commit();
-    }
-
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_BACK) {
@@ -177,8 +128,8 @@ public class MainActivity extends AppCompatActivity implements ManageFragment {
                     .equals(new TitleFragment().getClass().getCanonicalName())) {
                 openQuitDialog();
             }  else {
-                getSupportFragmentManager().popBackStack();
                 removeCurrentFragment();
+                getSupportFragmentManager().popBackStack();
                 return false;
             }
         }
@@ -188,14 +139,13 @@ public class MainActivity extends AppCompatActivity implements ManageFragment {
     public void removeCurrentFragment() {
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
         Fragment currentFrag =  getSupportFragmentManager().findFragmentById(R.id.fragment_container);
-        String fragName = "NONE";
-
-        if (currentFrag!=null) {
-            fragName = currentFrag.getClass().getSimpleName();
-        }
+        Fragment noteFrag =  getSupportFragmentManager().findFragmentById(R.id.fragment_note);
 
         if (currentFrag != null) {
             transaction.remove(currentFrag);
+            if (noteFrag != null) {
+                transaction.remove(noteFrag);
+            }
         }
         transaction.commit();
     }
@@ -228,5 +178,4 @@ public class MainActivity extends AppCompatActivity implements ManageFragment {
     public Publisher getPublisher() {
         return publisher;
     }
-
 }

@@ -17,13 +17,18 @@ public class CardsSourceImpl implements CardsSource{
         this.resources = resources;
     }
 
-    public CardsSourceImpl init() {
+    public CardsSourceImpl init(CardsSourceResponse cardsSourceResponse) {
         String[] title = resources.getStringArray(R.array.titles);
         String[] description = resources.getStringArray(R.array.description);
 
         for (int i = 0; i < title.length; i++) {
-            dataSource.add(new CardNote(i, title[i], Calendar.getInstance().getTime(), description[i], false));
+            dataSource.add(new CardNote(title[i], Calendar.getInstance().getTime(), description[i], false));
         }
+
+        if (cardsSourceResponse != null){
+            cardsSourceResponse.initialized(this);
+        }
+
         return this;
     }
 

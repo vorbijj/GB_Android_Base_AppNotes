@@ -25,14 +25,18 @@ public class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.ViewHolder> {
     private OnItemClickListener itemClickListener;
     private int menuPosition;
 
-    public NoteAdapter(CardsSource dataSource, Fragment fragment) {
-        this.dataSource = dataSource;
+    public NoteAdapter(Fragment fragment) {
         this.fragment = fragment;
+    }
+
+    public void setDataSource(CardsSource dataSource) {
+        this.dataSource = dataSource;
+        notifyDataSetChanged();
     }
 
     @NonNull
     @Override
-    public NoteAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int index) {
+    public ViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int index) {
         View v = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.item, viewGroup, false);
         Log.d(TAG, "onCreateViewHolder");
         return new ViewHolder(v);

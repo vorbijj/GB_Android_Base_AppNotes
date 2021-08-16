@@ -6,14 +6,13 @@ import android.os.Parcelable;
 import java.util.Date;
 
 public class CardNote implements Parcelable {
-    private int indexNote;
+    private String id;
     private String title;
     private Date date;
     private String description;
     private boolean like;
 
-    public CardNote(int indexNote, String title, Date date, String description, boolean like) {
-        this.indexNote = indexNote;
+    public CardNote(String title, Date date, String description, boolean like) {
         this.title = title;
         this.date = date;
         this.description = description;
@@ -21,7 +20,6 @@ public class CardNote implements Parcelable {
     }
 
     protected CardNote(Parcel in) {
-        indexNote = in.readInt();
         title = in.readString();
         date = new Date(in.readLong());
         description = in.readString();
@@ -30,7 +28,6 @@ public class CardNote implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeInt(indexNote);
         dest.writeString(title);
         dest.writeLong(date.getTime());
         dest.writeString(description);
@@ -58,10 +55,6 @@ public class CardNote implements Parcelable {
         return like;
     }
 
-    public int getIndexNote() {
-        return indexNote;
-    }
-
     public String getTitle() {
         return title;
     }
@@ -72,6 +65,14 @@ public class CardNote implements Parcelable {
 
     public String getDescription() {
         return description;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 
 }

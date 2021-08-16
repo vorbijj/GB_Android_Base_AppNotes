@@ -33,7 +33,6 @@ public class CardFragment extends Fragment {
 
     private CardNote cardNote;
     private Publisher publisher;
-    private CardsSource data;
 
     private TextInputEditText title;
     private TextInputEditText description;
@@ -58,7 +57,6 @@ public class CardFragment extends Fragment {
         if (getArguments() != null) {
             cardNote = getArguments().getParcelable(ARG_CARD_NOTE);
         }
-        data = new CardsSourceImpl(getResources()).init();
     }
 
     @Override
@@ -92,7 +90,6 @@ public class CardFragment extends Fragment {
         menu.removeItem(R.id.action_search);
         menu.removeItem(R.id.action_favorite);
         menu.removeItem(R.id.action_sort);
-
     }
 
     @Override
@@ -122,14 +119,19 @@ public class CardFragment extends Fragment {
         String title = this.title.getText().toString();
         String description = this.description.getText().toString();
         Date date = getDateFromDatePicker();
-        int index = data.size();
+
+        CardNote answer;
         boolean like;
+
         if (cardNote != null){
             like = cardNote.isLike();
+            answer = new CardNote(title, date, description, like);
+            answer.setId(cardNote.getId());
         } else {
             like = false;
+            answer = new CardNote(title, date, description, like);
         }
-        return new CardNote(index, title, date, description, like);
+        return answer;
     }
 
     private Date getDateFromDatePicker() {
