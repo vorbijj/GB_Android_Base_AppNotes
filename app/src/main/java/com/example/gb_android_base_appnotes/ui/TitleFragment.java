@@ -43,7 +43,7 @@ public class TitleFragment extends Fragment {
     private CardsSource data;
     private NoteAdapter adapter;
     private Publisher publisher;
-    MainActivity activity;
+    private MainActivity activity;
 
     private boolean moveToFirstPosition;
 
@@ -122,6 +122,7 @@ public class TitleFragment extends Fragment {
 
     @Override
     public void onDetach() {
+        activity = null;
         publisher = null;
         super.onDetach();
     }
