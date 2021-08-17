@@ -12,7 +12,9 @@
     <string name="select">Select</string>
     <string name="question_exit">Выход: Вы уверены?</string>
     <string name="text_yes">Да</string>
+    <string name="text_yes_">Да!</string>
     <string name="text_no">Нет</string>
+    <string name="text_no_">Нет!</string>
     <string name="about">About</string>
     <string name="settings">Settings</string>
     <string name="main">Main</string>
@@ -27,4 +29,7 @@
     <string name="update">Update</string>
     <string name="delete">Delete</string>
     <string name="back">Back</string>
+    <string name="exclamation">Важное сообщение!</string>
+    <string name="delete_question">Вы точно хотите удалить выбранную запись?</string>
+    <string name="clear_question">Вы точно хотите удалить ВСЕ записи?</string>
 </resources>

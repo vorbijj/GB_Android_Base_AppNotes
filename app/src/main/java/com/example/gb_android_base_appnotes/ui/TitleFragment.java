@@ -1,7 +1,8 @@
 package com.example.gb_android_base_appnotes.ui;
 
+import android.app.AlertDialog;
 import android.content.Context;
-import android.content.SharedPreferences;
+import android.content.DialogInterface;
 import android.content.res.Configuration;
 import android.os.Bundle;
 
@@ -26,12 +27,10 @@ import android.widget.Toast;
 
 
 import com.example.gb_android_base_appnotes.MainActivity;
-import com.example.gb_android_base_appnotes.Navigation;
 import com.example.gb_android_base_appnotes.R;
 import com.example.gb_android_base_appnotes.data.CardNote;
 import com.example.gb_android_base_appnotes.data.CardsSource;
 import com.example.gb_android_base_appnotes.data.CardsSourceFirebaseImpl;
-import com.example.gb_android_base_appnotes.data.CardsSourceImpl;
 import com.example.gb_android_base_appnotes.data.CardsSourceResponse;
 import com.example.gb_android_base_appnotes.observe.Observer;
 import com.example.gb_android_base_appnotes.observe.Publisher;
@@ -44,6 +43,7 @@ public class TitleFragment extends Fragment {
     private CardsSource data;
     private NoteAdapter adapter;
     private Publisher publisher;
+    private MainActivity activity;
 
     private boolean moveToFirstPosition;
 
@@ -113,7 +113,7 @@ public class TitleFragment extends Fragment {
     public void onAttach(@NonNull Context context) {
         super.onAttach(context);
 
-        MainActivity activity = (MainActivity)context;
+        activity = (MainActivity)context;
         publisher = activity.getPublisher();
 
         isLandscape = getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE;
@@ -122,6 +122,7 @@ public class TitleFragment extends Fragment {
 
     @Override
     public void onDetach() {
+        activity = null;
         publisher = null;
         super.onDetach();
     }
@@ -229,17 +230,59 @@ public class TitleFragment extends Fragment {
                 return true;
             case R.id.action_delete:
                 int deletePosition = adapter.getMenuPosition();
-                data.deleteCardNote(deletePosition);
-                adapter.notifyItemRemoved(deletePosition);
-                showEmptyNote();
+                openDeleteDialog(deletePosition);
                 return true;
             case R.id.action_clear:
-                data.clearCardNote();
-                adapter.notifyDataSetChanged();
-                showEmptyNote();
+                openClearDialog();
                 return true;
         }
         return false;
+    }
+
+    private void openDeleteDialog(int deletePosition) {
+        AlertDialog.Builder deleteDialog = new AlertDialog.Builder(activity);
+        deleteDialog.setTitle(R.string.exclamation)
+                .setMessage(R.string.delete_question)
+                .setIcon(R.drawable.ic_baseline_alert)
+                .setCancelable(false)
+                .setNegativeButton(R.string.text_no, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        Toast.makeText(activity, R.string.text_no_, Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .setPositiveButton(R.string.text_yes, new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                Toast.makeText(activity, R.string.text_yes_, Toast.LENGTH_SHORT).show();
+                                data.deleteCardNote(deletePosition);
+                                adapter.notifyItemRemoved(deletePosition);
+                                showEmptyNote();
+                            }
+                        });
+        AlertDialog alert = deleteDialog.create();
+        alert.show();
+    }
+
+    private void openClearDialog() {
+        AlertDialog.Builder clearDialog = new AlertDialog.Builder(activity);
+        clearDialog.setTitle(R.string.exclamation)
+                .setMessage(R.string.clear_question)
+                .setIcon(R.drawable.ic_baseline_alert)
+                .setCancelable(false)
+                .setNegativeButton(R.string.text_no, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        Toast.makeText(activity, R.string.text_no_, Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .setPositiveButton(R.string.text_yes, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        Toast.makeText(activity, R.string.text_yes_, Toast.LENGTH_SHORT).show();
+                        data.clearCardNote();
+                        adapter.notifyDataSetChanged();
+                        showEmptyNote();
+                    }
+                });
+        AlertDialog alert = clearDialog.create();
+        alert.show();
     }
 
     private void addFragment(Fragment fragment, boolean useBackStack){
