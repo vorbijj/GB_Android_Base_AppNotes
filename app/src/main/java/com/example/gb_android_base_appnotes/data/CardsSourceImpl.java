@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
-public class CardsSourceImpl implements CardsSource{
+public class CardsSourceImpl implements CardsSource {
     private List<CardNote> dataSource;
     private Resources resources;
 
@@ -25,7 +25,7 @@ public class CardsSourceImpl implements CardsSource{
             dataSource.add(new CardNote(title[i], Calendar.getInstance().getTime(), description[i], false));
         }
 
-        if (cardsSourceResponse != null){
+        if (cardsSourceResponse != null) {
             cardsSourceResponse.initialized(this);
         }
 

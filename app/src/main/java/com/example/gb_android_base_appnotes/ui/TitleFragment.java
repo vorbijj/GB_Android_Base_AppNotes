@@ -5,6 +5,14 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.res.Configuration;
 import android.os.Bundle;
+import android.view.ContextMenu;
+import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -15,16 +23,6 @@ import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
-import android.view.ContextMenu;
-import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.Toast;
-
 
 import com.example.gb_android_base_appnotes.MainActivity;
 import com.example.gb_android_base_appnotes.R;
@@ -93,12 +91,12 @@ public class TitleFragment extends Fragment {
         animator.setRemoveDuration(MY_DEFAULT_DURATION);
         recyclerView.setItemAnimator(animator);
 
-        if (moveToFirstPosition && data.size() > 0){
+        if (moveToFirstPosition && data.size() > 0) {
             recyclerView.scrollToPosition(0);
             moveToFirstPosition = false;
         }
 
-        adapter.SetOnItemClickListener(new NoteAdapter.OnItemClickListener(){
+        adapter.SetOnItemClickListener(new NoteAdapter.OnItemClickListener() {
             public void onItemClick(View view, int position) {
                 currentCardNote = new CardNote(data.getNoteData(position).getTitle(),
                         data.getNoteData(position).getDate(),
@@ -113,7 +111,7 @@ public class TitleFragment extends Fragment {
     public void onAttach(@NonNull Context context) {
         super.onAttach(context);
 
-        activity = (MainActivity)context;
+        activity = (MainActivity) context;
         publisher = activity.getPublisher();
 
         isLandscape = getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE;
@@ -150,7 +148,7 @@ public class TitleFragment extends Fragment {
         if (savedInstanceState != null) {
             currentCardNote = savedInstanceState.getParcelable(CURRENT_NOTE);
         }
-        if (isLandscape){
+        if (isLandscape) {
             showLandNote(currentCardNote);
         }
     }
@@ -196,7 +194,7 @@ public class TitleFragment extends Fragment {
                 .getSupportFragmentManager();
         Fragment detail = fragmentManager.findFragmentById(R.id.fragment_note);
 
-        if(detail != null){
+        if (detail != null) {
             FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
             fragmentTransaction.remove(detail);
             fragmentTransaction.commit();
@@ -206,7 +204,7 @@ public class TitleFragment extends Fragment {
     private boolean onItemSelected(int menuItem) {
         switch (menuItem) {
             case R.id.action_add:
-               addFragment(CardFragment.newInstance(), true);
+                addFragment(CardFragment.newInstance(), true);
                 publisher.subscribe(new Observer() {
                     @Override
                     public void updateCardNote(CardNote cardNote) {
@@ -251,13 +249,13 @@ public class TitleFragment extends Fragment {
                     }
                 })
                 .setPositiveButton(R.string.text_yes, new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-                                Toast.makeText(activity, R.string.text_yes_, Toast.LENGTH_SHORT).show();
-                                data.deleteCardNote(deletePosition);
-                                adapter.notifyItemRemoved(deletePosition);
-                                showEmptyNote();
-                            }
-                        });
+                    public void onClick(DialogInterface dialog, int id) {
+                        Toast.makeText(activity, R.string.text_yes_, Toast.LENGTH_SHORT).show();
+                        data.deleteCardNote(deletePosition);
+                        adapter.notifyItemRemoved(deletePosition);
+                        showEmptyNote();
+                    }
+                });
         AlertDialog alert = deleteDialog.create();
         alert.show();
     }
@@ -285,7 +283,7 @@ public class TitleFragment extends Fragment {
         alert.show();
     }
 
-    private void addFragment(Fragment fragment, boolean useBackStack){
+    private void addFragment(Fragment fragment, boolean useBackStack) {
         FragmentManager fragmentManager = requireActivity().getSupportFragmentManager();
         Fragment currentFragment = fragmentManager.findFragmentById(R.id.fragment_container);
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();

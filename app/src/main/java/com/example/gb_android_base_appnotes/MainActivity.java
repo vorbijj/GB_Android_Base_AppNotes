@@ -1,15 +1,5 @@
 package com.example.gb_android_base_appnotes;
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.ActionBarDrawerToggle;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.SearchView;
-import androidx.drawerlayout.widget.DrawerLayout;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentTransaction;
-import androidx.appcompat.widget.Toolbar;
-
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.KeyEvent;
@@ -17,7 +7,15 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.SearchView;
+import androidx.appcompat.widget.Toolbar;
+import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
 
 import com.example.gb_android_base_appnotes.observe.Publisher;
 import com.example.gb_android_base_appnotes.ui.AboutFragment;
@@ -28,7 +26,7 @@ import com.example.gb_android_base_appnotes.ui.TitleFragment;
 import com.google.android.material.navigation.NavigationView;
 
 
-public class MainActivity extends AppCompatActivity{
+public class MainActivity extends AppCompatActivity {
 
     private Navigation navigation;
     private Publisher publisher = new Publisher();
@@ -62,7 +60,7 @@ public class MainActivity extends AppCompatActivity{
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
                 int id = item.getItemId();
 
-                switch(id){
+                switch (id) {
                     case R.id.action_main:
                         navigation.toBackMainFragment();
                         return true;
@@ -87,7 +85,7 @@ public class MainActivity extends AppCompatActivity{
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
-        switch(id){
+        switch (id) {
             case R.id.action_sort:
                 navigation.addFragmentSecondary(new SortFragment());
                 return true;
@@ -127,7 +125,7 @@ public class MainActivity extends AppCompatActivity{
             if (getSupportFragmentManager().findFragmentById(R.id.fragment_container).getClass().getCanonicalName()
                     .equals(new TitleFragment().getClass().getCanonicalName())) {
                 openQuitDialog();
-            }  else {
+            } else {
                 removeCurrentFragment();
                 getSupportFragmentManager().popBackStack();
                 return false;
@@ -138,8 +136,8 @@ public class MainActivity extends AppCompatActivity{
 
     public void removeCurrentFragment() {
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-        Fragment currentFrag =  getSupportFragmentManager().findFragmentById(R.id.fragment_container);
-        Fragment noteFrag =  getSupportFragmentManager().findFragmentById(R.id.fragment_note);
+        Fragment currentFrag = getSupportFragmentManager().findFragmentById(R.id.fragment_container);
+        Fragment noteFrag = getSupportFragmentManager().findFragmentById(R.id.fragment_note);
 
         if (currentFrag != null) {
             transaction.remove(currentFrag);

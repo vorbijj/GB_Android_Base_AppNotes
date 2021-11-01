@@ -4,15 +4,11 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
-import com.example.gb_android_base_appnotes.data.CardNote;
-import com.example.gb_android_base_appnotes.ui.NoteFragment;
-import com.example.gb_android_base_appnotes.ui.TitleFragment;
-
 
 public class Navigation {
     private final FragmentManager fragmentManager;
 
-    public Navigation(FragmentManager fragmentManager){
+    public Navigation(FragmentManager fragmentManager) {
         this.fragmentManager = fragmentManager;
     }
 

@@ -3,13 +3,6 @@ package com.example.gb_android_base_appnotes.ui;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.os.Bundle;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentTransaction;
-
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -18,8 +11,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
+
 import com.example.gb_android_base_appnotes.R;
-import com.example.gb_android_base_appnotes.ui.EmptyFragment;
 
 public class FavoriteFragment extends Fragment {
     private boolean isLandscape;
@@ -58,7 +56,7 @@ public class FavoriteFragment extends Fragment {
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        if (item.getItemId() == R.id.action_select){
+        if (item.getItemId() == R.id.action_select) {
             Toast.makeText(getContext(), "Chosen select",
                     Toast.LENGTH_SHORT).show();
             return true;

@@ -7,7 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class CardNoteMapping {
-    public static class Fields{
+    public static class Fields {
         public final static String TITLE = "title";
         public final static String DATE = "date";
         public final static String DESCRIPTION = "description";
@@ -15,7 +15,7 @@ public class CardNoteMapping {
     }
 
     public static CardNote toCardNote(String id, Map<String, Object> doc) {
-        Timestamp timeStamp = (Timestamp)doc.get(Fields.DATE);
+        Timestamp timeStamp = (Timestamp) doc.get(Fields.DATE);
         CardNote answer = new CardNote((String) doc.get(Fields.TITLE),
                 timeStamp.toDate(),
                 (String) doc.get(Fields.DESCRIPTION),
@@ -23,7 +23,8 @@ public class CardNoteMapping {
         answer.setId(id);
         return answer;
     }
-    public static Map<String, Object> toDocument(CardNote cardNote){
+
+    public static Map<String, Object> toDocument(CardNote cardNote) {
         Map<String, Object> answer = new HashMap<>();
         answer.put(Fields.TITLE, cardNote.getTitle());
         answer.put(Fields.DESCRIPTION, cardNote.getDescription());

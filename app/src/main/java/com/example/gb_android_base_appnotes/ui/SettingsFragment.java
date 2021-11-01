@@ -3,6 +3,9 @@ package com.example.gb_android_base_appnotes.ui;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -10,12 +13,7 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-
 import com.example.gb_android_base_appnotes.R;
-import com.example.gb_android_base_appnotes.ui.EmptyFragment;
 
 public class SettingsFragment extends Fragment {
     private boolean isLandscape;

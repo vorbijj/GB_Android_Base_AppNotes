@@ -36,9 +36,9 @@ public class CardsSourceFirebaseImpl implements CardsSource {
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                     @Override
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        if (task.isSuccessful()){
+                        if (task.isSuccessful()) {
                             cardsNote = new ArrayList<>();
-                            for(QueryDocumentSnapshot document : task.getResult()){
+                            for (QueryDocumentSnapshot document : task.getResult()) {
                                 Map<String, Object> doc = document.getData();
                                 String id = document.getId();
                                 CardNote cardNote = CardNoteMapping.toCardNote(id, doc);
@@ -68,7 +68,7 @@ public class CardsSourceFirebaseImpl implements CardsSource {
 
     @Override
     public int size() {
-        if (cardsNote == null){
+        if (cardsNote == null) {
             return 0;
         }
         return cardsNote.size();
@@ -89,7 +89,7 @@ public class CardsSourceFirebaseImpl implements CardsSource {
     @Override
     public void addCardNote(CardNote cardNote) {
         collection.add(CardNoteMapping.toDocument(cardNote))
-                .addOnSuccessListener(new OnSuccessListener<DocumentReference>(){
+                .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
                     @Override
                     public void onSuccess(DocumentReference documentReference) {
                         cardNote.setId(documentReference.getId());
@@ -99,7 +99,7 @@ public class CardsSourceFirebaseImpl implements CardsSource {
 
     @Override
     public void clearCardNote() {
-        for (CardNote cardNote: cardsNote) {
+        for (CardNote cardNote : cardsNote) {
             collection.document(cardNote.getId()).delete();
         }
         cardsNote = new ArrayList<CardNote>();

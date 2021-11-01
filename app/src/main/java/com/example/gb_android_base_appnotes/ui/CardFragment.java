@@ -2,11 +2,6 @@ package com.example.gb_android_base_appnotes.ui;
 
 import android.content.Context;
 import android.os.Bundle;
-
-import androidx.annotation.NonNull;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
-
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -15,12 +10,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.DatePicker;
 
+import androidx.annotation.NonNull;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+
 import com.example.gb_android_base_appnotes.MainActivity;
 import com.example.gb_android_base_appnotes.R;
 import com.example.gb_android_base_appnotes.data.CardNote;
-import com.example.gb_android_base_appnotes.data.CardsSource;
-import com.example.gb_android_base_appnotes.data.CardsSourceImpl;
-import com.example.gb_android_base_appnotes.observe.Observer;
 import com.example.gb_android_base_appnotes.observe.Publisher;
 import com.google.android.material.textfield.TextInputEditText;
 
@@ -62,7 +58,7 @@ public class CardFragment extends Fragment {
     @Override
     public void onAttach(@NonNull Context context) {
         super.onAttach(context);
-        MainActivity activity = (MainActivity)context;
+        MainActivity activity = (MainActivity) context;
         publisher = activity.getPublisher();
     }
 
@@ -94,7 +90,7 @@ public class CardFragment extends Fragment {
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        switch (item.getItemId()){
+        switch (item.getItemId()) {
             case R.id.action_back:
                 FragmentManager fm = requireActivity().getSupportFragmentManager();
                 fm.popBackStack();
@@ -115,7 +111,7 @@ public class CardFragment extends Fragment {
         publisher.notifySingle(cardNote);
     }
 
-    private CardNote collectCardNote(){
+    private CardNote collectCardNote() {
         String title = this.title.getText().toString();
         String description = this.description.getText().toString();
         Date date = getDateFromDatePicker();
@@ -123,7 +119,7 @@ public class CardFragment extends Fragment {
         CardNote answer;
         boolean like;
 
-        if (cardNote != null){
+        if (cardNote != null) {
             like = cardNote.isLike();
             answer = new CardNote(title, date, description, like);
             answer.setId(cardNote.getId());
@@ -148,7 +144,7 @@ public class CardFragment extends Fragment {
         datePicker = view.findViewById(R.id.inputDate);
     }
 
-    private void populateView(){
+    private void populateView() {
         title.setText(cardNote.getTitle());
         description.setText(cardNote.getDescription());
         initDatePicker(cardNote.getDate());
