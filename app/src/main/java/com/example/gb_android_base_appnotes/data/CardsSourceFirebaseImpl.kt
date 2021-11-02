@@ -1,107 +1,71 @@
-package com.example.gb_android_base_appnotes.data;
+package com.example.gb_android_base_appnotes.data
 
-import android.util.Log;
+import android.util.Log
+import com.example.gb_android_base_appnotes.data.CardNoteMapping.toCardNote
+import com.example.gb_android_base_appnotes.data.CardNoteMapping.toDocument
+import com.google.firebase.firestore.*
+import java.util.*
 
-import androidx.annotation.NonNull;
-
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.firestore.CollectionReference;
-import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.Query;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.google.firebase.firestore.QuerySnapshot;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
-public class CardsSourceFirebaseImpl implements CardsSource {
-    private static final String CARDS_COLLECTION = "cards";
-    private static final String TAG = "[FirebaseImpl]";
-
-    private FirebaseFirestore store = FirebaseFirestore.getInstance();
-    private CollectionReference collection = store.collection(CARDS_COLLECTION);
-
-    private List<CardNote> cardsNote = new ArrayList<>();
-
-    @Override
-    public CardsSource init(CardsSourceResponse cardsSourceResponse) {
-
+class CardsSourceFirebaseImpl : CardsSource {
+    private val store = FirebaseFirestore.getInstance()
+    private val collection = store.collection(CARDS_COLLECTION)
+    private var cardsNote: MutableList<CardNote>? = ArrayList()
+    override fun init(cardsSourceResponse: CardsSourceResponse?): CardsSource? {
         collection.orderBy(CardNoteMapping.Fields.DATE, Query.Direction.DESCENDING)
                 .get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        if (task.isSuccessful()) {
-                            cardsNote = new ArrayList<>();
-                            for (QueryDocumentSnapshot document : task.getResult()) {
-                                Map<String, Object> doc = document.getData();
-                                String id = document.getId();
-                                CardNote cardNote = CardNoteMapping.toCardNote(id, doc);
-                                cardsNote.add(cardNote);
-                            }
-                            Log.d(TAG, "success " + cardsNote.size() + " qnt");
-                            cardsSourceResponse.initialized(CardsSourceFirebaseImpl.this);
-                        } else {
-                            Log.d(TAG, "get failed with ", task.getException());
+                .addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        cardsNote = ArrayList()
+                        for (document in task.result!!) {
+                            val doc = document.data
+                            val id = document.id
+                            val cardNote = toCardNote(id, doc)
+                            (cardsNote as ArrayList<CardNote>).add(cardNote)
                         }
+                        Log.d(TAG, "success " + (cardsNote as ArrayList<CardNote>).size + " qnt")
+                        cardsSourceResponse!!.initialized(this@CardsSourceFirebaseImpl)
+                    } else {
+                        Log.d(TAG, "get failed with ", task.exception)
                     }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Log.d(TAG, "get failed with ", e);
-                    }
-                });
-
-        return this;
+                }
+                .addOnFailureListener { e -> Log.d(TAG, "get failed with ", e) }
+        return this
     }
 
-    @Override
-    public CardNote getNoteData(int position) {
-        return cardsNote.get(position);
+    override fun getNoteData(position: Int): CardNote? {
+        return cardsNote!![position]
     }
 
-    @Override
-    public int size() {
-        if (cardsNote == null) {
-            return 0;
+    override fun size(): Int {
+        return if (cardsNote == null) {
+            0
+        } else cardsNote!!.size
+    }
+
+    override fun deleteCardNote(position: Int) {
+        collection.document(cardsNote!![position].id!!).delete()
+        cardsNote!!.removeAt(position)
+    }
+
+    override fun updateCardNote(position: Int, cardNote: CardNote?) {
+        val id = cardNote!!.id
+        collection.document(id!!).set(toDocument(cardNote))
+    }
+
+    override fun addCardNote(cardNote: CardNote?) {
+        collection.add(toDocument(cardNote!!))
+                .addOnSuccessListener { documentReference -> cardNote.id = documentReference.id }
+    }
+
+    override fun clearCardNote() {
+        for (cardNote in cardsNote!!) {
+            collection.document(cardNote.id!!).delete()
         }
-        return cardsNote.size();
+        cardsNote = ArrayList()
     }
 
-    @Override
-    public void deleteCardNote(int position) {
-        collection.document(cardsNote.get(position).getId()).delete();
-        cardsNote.remove(position);
-    }
-
-    @Override
-    public void updateCardNote(int position, CardNote cardNote) {
-        String id = cardNote.getId();
-        collection.document(id).set(CardNoteMapping.toDocument(cardNote));
-    }
-
-    @Override
-    public void addCardNote(CardNote cardNote) {
-        collection.add(CardNoteMapping.toDocument(cardNote))
-                .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
-                    @Override
-                    public void onSuccess(DocumentReference documentReference) {
-                        cardNote.setId(documentReference.getId());
-                    }
-                });
-    }
-
-    @Override
-    public void clearCardNote() {
-        for (CardNote cardNote : cardsNote) {
-            collection.document(cardNote.getId()).delete();
-        }
-        cardsNote = new ArrayList<CardNote>();
+    companion object {
+        private const val CARDS_COLLECTION = "cards"
+        private const val TAG = "[FirebaseImpl]"
     }
 }

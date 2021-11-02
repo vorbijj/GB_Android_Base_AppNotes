@@ -1,55 +1,42 @@
-package com.example.gb_android_base_appnotes;
+package com.example.gb_android_base_appnotes
 
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentTransaction;
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
 
-
-public class Navigation {
-    private final FragmentManager fragmentManager;
-
-    public Navigation(FragmentManager fragmentManager) {
-        this.fragmentManager = fragmentManager;
-    }
-
-    public void addFragment(Fragment fragment, boolean useBackStack) {
-        Fragment currentFragment = fragmentManager.findFragmentById(R.id.fragment_container);
-        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-
+class Navigation(private val fragmentManager: FragmentManager) {
+    fun addFragment(fragment: Fragment?, useBackStack: Boolean) {
+        val currentFragment = fragmentManager.findFragmentById(R.id.fragment_container)
+        val fragmentTransaction = fragmentManager.beginTransaction()
         if (currentFragment != null) {
-            fragmentTransaction.remove(currentFragment);
+            fragmentTransaction.remove(currentFragment)
         }
-        fragmentTransaction.add(R.id.fragment_container, fragment);
-
+        fragmentTransaction.add(R.id.fragment_container, fragment!!)
         if (useBackStack) {
-            fragmentTransaction.addToBackStack(null);
+            fragmentTransaction.addToBackStack(null)
         }
-
-        fragmentTransaction.commit();
+        fragmentTransaction.commit()
     }
 
-    public void addFragmentSecondary(Fragment fragment) {
-        Fragment currentFragment = fragmentManager.findFragmentById(R.id.fragment_container);
-
-        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-        fragmentTransaction.remove(currentFragment);
-        fragmentTransaction.add(R.id.fragment_container, fragment);
-
-        int count = fragmentManager.getBackStackEntryCount();
+    fun addFragmentSecondary(fragment: Fragment?) {
+        val currentFragment = fragmentManager.findFragmentById(R.id.fragment_container)
+        val fragmentTransaction = fragmentManager.beginTransaction()
+        fragmentTransaction.remove(currentFragment!!)
+        fragmentTransaction.add(R.id.fragment_container, fragment!!)
+        val count = fragmentManager.backStackEntryCount
         if (count == 0) {
-            fragmentTransaction.addToBackStack(null);
+            fragmentTransaction.addToBackStack(null)
         }
-        fragmentTransaction.commit();
+        fragmentTransaction.commit()
     }
 
-    public void toBackMainFragment() {
-        Fragment fragment = fragmentManager.findFragmentById(R.id.fragment_container);
-        int count = fragmentManager.getBackStackEntryCount();
+    fun toBackMainFragment() {
+        val fragment = fragmentManager.findFragmentById(R.id.fragment_container)
+        val count = fragmentManager.backStackEntryCount
         if (count > 0) {
             if (fragment != null) {
-                fragmentManager.beginTransaction().remove(fragment).commit();
+                fragmentManager.beginTransaction().remove(fragment).commit()
             }
-            fragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+            fragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE)
         }
     }
 }

@@ -1,78 +1,39 @@
-package com.example.gb_android_base_appnotes.data;
+package com.example.gb_android_base_appnotes.data
 
-import android.os.Parcel;
-import android.os.Parcelable;
+import android.os.Parcel
+import android.os.Parcelable
+import android.os.Parcelable.Creator
+import java.util.*
 
-import java.util.Date;
+data class CardNote(var title: String?, var date: Date, var description: String?, var isLike: Boolean) : Parcelable {
+    var id: String? = null
 
-public class CardNote implements Parcelable {
-    private String id;
-    private String title;
-    private Date date;
-    private String description;
-    private boolean like;
-
-    public CardNote(String title, Date date, String description, boolean like) {
-        this.title = title;
-        this.date = date;
-        this.description = description;
-        this.like = like;
+    constructor(parcel: Parcel) : this(
+            parcel.readString(),
+            parcel.readLong() as Date,
+            parcel.readString(),
+            parcel.readByte() != 0.toByte()) {
+        id = parcel.readString()
     }
 
-    protected CardNote(Parcel in) {
-        title = in.readString();
-        date = new Date(in.readLong());
-        description = in.readString();
-        like = in.readByte() != 0;
+    override fun writeToParcel(parcel: Parcel, flags: Int) {
+        parcel.writeString(title)
+        parcel.writeString(description)
+        parcel.writeByte(if (isLike) 1 else 0)
+        parcel.writeString(id)
     }
 
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(title);
-        dest.writeLong(date.getTime());
-        dest.writeString(description);
-        dest.writeByte((byte) (like ? 1 : 0));
+    override fun describeContents(): Int {
+        return 0
     }
 
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    public static final Creator<CardNote> CREATOR = new Creator<CardNote>() {
-        @Override
-        public CardNote createFromParcel(Parcel in) {
-            return new CardNote(in);
+    companion object CREATOR : Creator<CardNote> {
+        override fun createFromParcel(parcel: Parcel): CardNote {
+            return CardNote(parcel)
         }
 
-        @Override
-        public CardNote[] newArray(int size) {
-            return new CardNote[size];
+        override fun newArray(size: Int): Array<CardNote?> {
+            return arrayOfNulls(size)
         }
-    };
-
-    public boolean isLike() {
-        return like;
     }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public Date getDate() {
-        return date;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
 }

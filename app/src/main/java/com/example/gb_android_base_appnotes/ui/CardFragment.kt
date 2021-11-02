@@ -1,161 +1,140 @@
-package com.example.gb_android_base_appnotes.ui;
+package com.example.gb_android_base_appnotes.ui
 
-import android.content.Context;
-import android.os.Bundle;
-import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.DatePicker;
+import android.content.Context
+import android.os.Bundle
+import android.view.*
+import android.widget.DatePicker
+import androidx.fragment.app.Fragment
+import com.example.gb_android_base_appnotes.MainActivity
+import com.example.gb_android_base_appnotes.R
+import com.example.gb_android_base_appnotes.data.CardNote
+import com.example.gb_android_base_appnotes.observe.Publisher
+import com.google.android.material.textfield.TextInputEditText
+import java.util.*
 
-import androidx.annotation.NonNull;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
-
-import com.example.gb_android_base_appnotes.MainActivity;
-import com.example.gb_android_base_appnotes.R;
-import com.example.gb_android_base_appnotes.data.CardNote;
-import com.example.gb_android_base_appnotes.observe.Publisher;
-import com.google.android.material.textfield.TextInputEditText;
-
-import java.util.Calendar;
-import java.util.Date;
-
-public class CardFragment extends Fragment {
-
-    private static final String ARG_CARD_NOTE = "Param_CardNote";
-
-    private CardNote cardNote;
-    private Publisher publisher;
-
-    private TextInputEditText title;
-    private TextInputEditText description;
-    private DatePicker datePicker;
-
-    public static CardFragment newInstance(CardNote cardNote) {
-        CardFragment fragment = new CardFragment();
-        Bundle args = new Bundle();
-        args.putParcelable(ARG_CARD_NOTE, cardNote);
-        fragment.setArguments(args);
-        return fragment;
-    }
-
-    public static CardFragment newInstance() {
-        CardFragment fragment = new CardFragment();
-        return fragment;
-    }
-
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            cardNote = getArguments().getParcelable(ARG_CARD_NOTE);
+class CardFragment : Fragment() {
+    private var cardNote: CardNote? = null
+    private var publisher: Publisher? = null
+    private var title: TextInputEditText? = null
+    private var description: TextInputEditText? = null
+    private var datePicker: DatePicker? = null
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        if (arguments != null) {
+            cardNote = requireArguments().getParcelable(ARG_CARD_NOTE)
         }
     }
 
-    @Override
-    public void onAttach(@NonNull Context context) {
-        super.onAttach(context);
-        MainActivity activity = (MainActivity) context;
-        publisher = activity.getPublisher();
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        val activity = context as MainActivity
+        publisher = activity.publisher
     }
 
-    @Override
-    public void onDetach() {
-        publisher = null;
-        super.onDetach();
+    override fun onDetach() {
+        publisher = null
+        super.onDetach()
     }
 
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_card, container, false);
-        setHasOptionsMenu(true);
-        initView(view);
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
+                              savedInstanceState: Bundle?): View? {
+        val view = inflater.inflate(R.layout.fragment_card, container, false)
+        setHasOptionsMenu(true)
+        initView(view)
         if (cardNote != null) {
-            populateView();
+            populateView()
         }
-        return view;
+        return view
     }
 
-    @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        inflater.inflate(R.menu.main_back, menu);
-        menu.removeItem(R.id.action_search);
-        menu.removeItem(R.id.action_favorite);
-        menu.removeItem(R.id.action_sort);
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        inflater.inflate(R.menu.main_back, menu)
+        menu.removeItem(R.id.action_search)
+        menu.removeItem(R.id.action_favorite)
+        menu.removeItem(R.id.action_sort)
     }
 
-    @Override
-    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.action_back:
-                FragmentManager fm = requireActivity().getSupportFragmentManager();
-                fm.popBackStack();
-                return true;
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
+            R.id.action_back -> {
+                val fm = requireActivity().supportFragmentManager
+                fm.popBackStack()
+                return true
+            }
         }
-        return super.onOptionsItemSelected(item);
+        return super.onOptionsItemSelected(item)
     }
 
-    @Override
-    public void onStop() {
-        super.onStop();
-        cardNote = collectCardNote();
+    override fun onStop() {
+        super.onStop()
+        cardNote = collectCardNote()
     }
 
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        publisher.notifySingle(cardNote);
+    override fun onDestroy() {
+        super.onDestroy()
+        publisher!!.notifySingle(cardNote)
     }
 
-    private CardNote collectCardNote() {
-        String title = this.title.getText().toString();
-        String description = this.description.getText().toString();
-        Date date = getDateFromDatePicker();
-
-        CardNote answer;
-        boolean like;
-
+    private fun collectCardNote(): CardNote {
+        val title = title!!.text.toString()
+        val description = description!!.text.toString()
+        val date = dateFromDatePicker
+        val answer: CardNote
+        val like: Boolean
         if (cardNote != null) {
-            like = cardNote.isLike();
-            answer = new CardNote(title, date, description, like);
-            answer.setId(cardNote.getId());
+            like = cardNote!!.isLike
+            answer = CardNote(title, date, description, like)
+            answer.id = cardNote!!.id
         } else {
-            like = false;
-            answer = new CardNote(title, date, description, like);
+            like = false
+            answer = CardNote(title, date, description, like)
         }
-        return answer;
+        return answer
     }
 
-    private Date getDateFromDatePicker() {
-        Calendar cal = Calendar.getInstance();
-        cal.set(Calendar.YEAR, this.datePicker.getYear());
-        cal.set(Calendar.MONTH, this.datePicker.getMonth());
-        cal.set(Calendar.DAY_OF_MONTH, this.datePicker.getDayOfMonth());
-        return cal.getTime();
+    private val dateFromDatePicker: Date
+        private get() {
+            val cal = Calendar.getInstance()
+            cal[Calendar.YEAR] = datePicker!!.year
+            cal[Calendar.MONTH] = datePicker!!.month
+            cal[Calendar.DAY_OF_MONTH] = datePicker!!.dayOfMonth
+            return cal.time
+        }
+
+    private fun initView(view: View) {
+        title = view.findViewById(R.id.inputTitle)
+        description = view.findViewById(R.id.inputDescription)
+        datePicker = view.findViewById(R.id.inputDate)
     }
 
-    private void initView(View view) {
-        title = view.findViewById(R.id.inputTitle);
-        description = view.findViewById(R.id.inputDescription);
-        datePicker = view.findViewById(R.id.inputDate);
+    private fun populateView() {
+        title!!.setText(cardNote!!.title)
+        description!!.setText(cardNote!!.description)
+        initDatePicker(cardNote!!.date)
     }
 
-    private void populateView() {
-        title.setText(cardNote.getTitle());
-        description.setText(cardNote.getDescription());
-        initDatePicker(cardNote.getDate());
+    private fun initDatePicker(date: Date) {
+        val calendar = Calendar.getInstance()
+        calendar.time = date
+        datePicker!!.init(calendar[Calendar.YEAR],
+                calendar[Calendar.MONTH],
+                calendar[Calendar.DAY_OF_MONTH],
+                null)
     }
 
-    private void initDatePicker(Date date) {
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(date);
-        this.datePicker.init(calendar.get(Calendar.YEAR),
-                calendar.get(Calendar.MONTH),
-                calendar.get(Calendar.DAY_OF_MONTH),
-                null);
+    companion object {
+        private const val ARG_CARD_NOTE = "Param_CardNote"
+        fun newInstance(cardNote: CardNote?): CardFragment {
+            val fragment = CardFragment()
+            val args = Bundle()
+            args.putParcelable(ARG_CARD_NOTE, cardNote)
+            fragment.arguments = args
+            return fragment
+        }
+
+        @JvmStatic
+        fun newInstance(): CardFragment {
+            return CardFragment()
+        }
     }
 }

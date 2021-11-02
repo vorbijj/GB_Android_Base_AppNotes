@@ -1,29 +1,26 @@
-package com.example.gb_android_base_appnotes.observe;
+package com.example.gb_android_base_appnotes.observe
 
-import com.example.gb_android_base_appnotes.data.CardNote;
+import com.example.gb_android_base_appnotes.data.CardNote
+import java.util.*
 
-import java.util.ArrayList;
-import java.util.List;
-
-public class Publisher {
-    private List<Observer> observers;
-
-    public Publisher() {
-        observers = new ArrayList<>();
+class Publisher {
+    private val observers: MutableList<Observer>
+    fun subscribe(observer: Observer) {
+        observers.add(observer)
     }
 
-    public void subscribe(Observer observer) {
-        observers.add(observer);
+    fun unsubscribe(observer: Observer) {
+        observers.remove(observer)
     }
 
-    public void unsubscribe(Observer observer) {
-        observers.remove(observer);
-    }
-
-    public void notifySingle(CardNote cardNote) {
-        for (Observer observer : observers) {
-            observer.updateCardNote(cardNote);
-            unsubscribe(observer);
+    fun notifySingle(cardNote: CardNote?) {
+        for (observer in observers) {
+            observer.updateCardNote(cardNote)
+            unsubscribe(observer)
         }
+    }
+
+    init {
+        observers = ArrayList()
     }
 }

@@ -1,322 +1,271 @@
-package com.example.gb_android_base_appnotes.ui;
+package com.example.gb_android_base_appnotes.ui
 
-import android.app.AlertDialog;
-import android.content.Context;
-import android.content.DialogInterface;
-import android.content.res.Configuration;
-import android.os.Bundle;
-import android.view.ContextMenu;
-import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.Toast;
+import android.annotation.SuppressLint
+import android.app.AlertDialog
+import android.content.Context
+import android.content.res.Configuration
+import android.os.Bundle
+import android.view.*
+import android.view.ContextMenu.ContextMenuInfo
+import android.widget.Toast
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentTransaction
+import androidx.recyclerview.widget.DefaultItemAnimator
+import androidx.recyclerview.widget.DividerItemDecoration
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.example.gb_android_base_appnotes.MainActivity
+import com.example.gb_android_base_appnotes.R
+import com.example.gb_android_base_appnotes.data.CardNote
+import com.example.gb_android_base_appnotes.data.CardsSource
+import com.example.gb_android_base_appnotes.data.CardsSourceFirebaseImpl
+import com.example.gb_android_base_appnotes.data.CardsSourceResponse
+import com.example.gb_android_base_appnotes.observe.Observer
+import com.example.gb_android_base_appnotes.observe.Publisher
+import com.example.gb_android_base_appnotes.ui.CardFragment.Companion.newInstance
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentTransaction;
-import androidx.recyclerview.widget.DefaultItemAnimator;
-import androidx.recyclerview.widget.DividerItemDecoration;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
-import com.example.gb_android_base_appnotes.MainActivity;
-import com.example.gb_android_base_appnotes.R;
-import com.example.gb_android_base_appnotes.data.CardNote;
-import com.example.gb_android_base_appnotes.data.CardsSource;
-import com.example.gb_android_base_appnotes.data.CardsSourceFirebaseImpl;
-import com.example.gb_android_base_appnotes.data.CardsSourceResponse;
-import com.example.gb_android_base_appnotes.observe.Observer;
-import com.example.gb_android_base_appnotes.observe.Publisher;
-
-public class TitleFragment extends Fragment {
-    private static final int MY_DEFAULT_DURATION = 1000;
-    public static final String CURRENT_NOTE = "CurrentNote";
-    private CardNote currentCardNote;
-    private boolean isLandscape;
-    private CardsSource data;
-    private NoteAdapter adapter;
-    private Publisher publisher;
-    private MainActivity activity;
-
-    private boolean moveToFirstPosition;
-
-    public static TitleFragment newInstance() {
-        return new TitleFragment();
-    }
-
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_title, container, false);
-        setHasOptionsMenu(true);
-        initRecyclerView(view);
-
-        data = new CardsSourceFirebaseImpl().init(new CardsSourceResponse() {
-            @Override
-            public void initialized(CardsSource cardsNote) {
-                adapter.notifyDataSetChanged();
+class TitleFragment : Fragment() {
+    private var currentCardNote: CardNote? = null
+    private var isLandscape = false
+    private var data: CardsSource? = null
+    private var adapter: NoteAdapter? = null
+    private var publisherTitle: Publisher? = null
+    private var activity: MainActivity? = null
+    private var moveToFirstPosition = false
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        val view = inflater.inflate(R.layout.fragment_title, container, false)
+        setHasOptionsMenu(true)
+        initRecyclerView(view)
+        data = CardsSourceFirebaseImpl().init(object : CardsSourceResponse {
+            override fun initialized(cardsNote: CardsSource?) {
+                adapter!!.notifyDataSetChanged()
             }
-        });
-        adapter.setDataSource(data);
-        return view;
+        })
+        adapter!!.setDataSource(data)
+        return view
     }
 
-    @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
     }
 
-    private void initRecyclerView(View view) {
-        RecyclerView recyclerView = view.findViewById(R.id.recycler_view_lines);
-        recyclerView.setHasFixedSize(true);
-
-        LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
-        recyclerView.setLayoutManager(layoutManager);
-
-        adapter = new NoteAdapter(this);
-        recyclerView.setAdapter(adapter);
-
-        DividerItemDecoration itemDecoration = new DividerItemDecoration(getContext(),
-                LinearLayoutManager.VERTICAL);
-        itemDecoration.setDrawable(getResources().getDrawable(R.drawable.separator));
-        recyclerView.addItemDecoration(itemDecoration);
-
-        DefaultItemAnimator animator = new DefaultItemAnimator();
-        animator.setAddDuration(MY_DEFAULT_DURATION);
-        animator.setRemoveDuration(MY_DEFAULT_DURATION);
-        recyclerView.setItemAnimator(animator);
-
-        if (moveToFirstPosition && data.size() > 0) {
-            recyclerView.scrollToPosition(0);
-            moveToFirstPosition = false;
+    private fun initRecyclerView(view: View) {
+        val recyclerView: RecyclerView = view.findViewById(R.id.recycler_view_lines)
+        recyclerView.setHasFixedSize(true)
+        val layoutManager = LinearLayoutManager(context)
+        recyclerView.layoutManager = layoutManager
+        adapter = NoteAdapter(this)
+        recyclerView.adapter = adapter
+        val itemDecoration = DividerItemDecoration(context,
+                LinearLayoutManager.VERTICAL)
+        itemDecoration.setDrawable(resources.getDrawable(R.drawable.separator))
+        recyclerView.addItemDecoration(itemDecoration)
+        val animator = DefaultItemAnimator()
+        animator.addDuration = MY_DEFAULT_DURATION.toLong()
+        animator.removeDuration = MY_DEFAULT_DURATION.toLong()
+        recyclerView.itemAnimator = animator
+        if (moveToFirstPosition && data!!.size() > 0) {
+            recyclerView.scrollToPosition(0)
+            moveToFirstPosition = false
         }
-
-        adapter.SetOnItemClickListener(new NoteAdapter.OnItemClickListener() {
-            public void onItemClick(View view, int position) {
-                currentCardNote = new CardNote(data.getNoteData(position).getTitle(),
-                        data.getNoteData(position).getDate(),
-                        data.getNoteData(position).getDescription(),
-                        data.getNoteData(position).isLike());
-                showNote(currentCardNote);
-            }
-        });
+        adapter!!.SetOnItemClickListener { view, position ->
+            currentCardNote = CardNote(data!!.getNoteData(position)!!.title,
+                    data!!.getNoteData(position)!!.date,
+                    data!!.getNoteData(position)!!.description,
+                    data!!.getNoteData(position)!!.isLike)
+            showNote(currentCardNote!!)
+        }
     }
 
-    @Override
-    public void onAttach(@NonNull Context context) {
-        super.onAttach(context);
-
-        activity = (MainActivity) context;
-        publisher = activity.getPublisher();
-
-        isLandscape = getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE;
-
+    @SuppressLint("UseRequireInsteadOfGet")
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        activity = context as MainActivity
+        publisherTitle = activity!!.publisher
+        isLandscape = resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
     }
 
-    @Override
-    public void onDetach() {
-        activity = null;
-        publisher = null;
-        super.onDetach();
+    override fun onDetach() {
+        activity = null
+        publisherTitle = null
+        super.onDetach()
     }
 
-    @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        inflater.inflate(R.menu.main_cards, menu);
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        inflater.inflate(R.menu.main_cards, menu)
     }
 
-    @Override
-    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        return onItemSelected(item.getItemId()) || super.onOptionsItemSelected(item);
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return onItemSelected(item.itemId) || super.onOptionsItemSelected(item)
     }
 
-    @Override
-    public void onSaveInstanceState(@NonNull Bundle outState) {
-        outState.putParcelable(CURRENT_NOTE, currentCardNote);
-        super.onSaveInstanceState(outState);
+    override fun onSaveInstanceState(outState: Bundle) {
+        outState.putParcelable(CURRENT_NOTE, currentCardNote)
+        super.onSaveInstanceState(outState)
     }
 
-    @Override
-    public void onViewStateRestored(@Nullable Bundle savedInstanceState) {
-        super.onViewStateRestored(savedInstanceState);
-
+    override fun onViewStateRestored(savedInstanceState: Bundle?) {
+        super.onViewStateRestored(savedInstanceState)
         if (savedInstanceState != null) {
-            currentCardNote = savedInstanceState.getParcelable(CURRENT_NOTE);
+            currentCardNote = savedInstanceState.getParcelable(CURRENT_NOTE)
         }
         if (isLandscape) {
-            showLandNote(currentCardNote);
+            showLandNote(currentCardNote)
         }
     }
 
-    @Override
-    public void onCreateContextMenu(@NonNull ContextMenu menu, @NonNull View v,
-                                    @Nullable ContextMenu.ContextMenuInfo menuInfo) {
-        super.onCreateContextMenu(menu, v, menuInfo);
-        MenuInflater inflater = requireActivity().getMenuInflater();
-        inflater.inflate(R.menu.card_menu, menu);
+    override fun onCreateContextMenu(menu: ContextMenu, v: View,
+                                     menuInfo: ContextMenuInfo?) {
+        super.onCreateContextMenu(menu, v, menuInfo)
+        val inflater = requireActivity().menuInflater
+        inflater.inflate(R.menu.card_menu, menu)
     }
 
-    @Override
-    public boolean onContextItemSelected(@NonNull MenuItem item) {
-        return onItemSelected(item.getItemId()) || super.onContextItemSelected(item);
+    override fun onContextItemSelected(item: MenuItem): Boolean {
+        return onItemSelected(item.itemId) || super.onContextItemSelected(item)
     }
 
-    private void showNote(CardNote currentCardNote) {
+    private fun showNote(currentCardNote: CardNote) {
         if (isLandscape) {
-            showLandNote(currentCardNote);
+            showLandNote(currentCardNote)
         } else {
-            showPortNote(currentCardNote);
+            showPortNote(currentCardNote)
         }
     }
 
-    private void showLandNote(CardNote currentCardNote) {
-        NoteFragment detail = NoteFragment.newInstance(currentCardNote);
-
-        FragmentManager fragmentManager = requireActivity()
-                .getSupportFragmentManager();
-        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-        fragmentTransaction.replace(R.id.fragment_note, detail);
-        fragmentTransaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
-        fragmentTransaction.commit();
+    private fun showLandNote(currentCardNote: CardNote?) {
+        val detail = NoteFragment.newInstance(currentCardNote)
+        val fragmentManager = requireActivity()
+                .supportFragmentManager
+        val fragmentTransaction = fragmentManager.beginTransaction()
+        fragmentTransaction.replace(R.id.fragment_note, detail)
+        fragmentTransaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
+        fragmentTransaction.commit()
     }
 
-    private void showPortNote(CardNote currentCardNote) {
-        replaceFragment(currentCardNote);
+    private fun showPortNote(currentCardNote: CardNote) {
+        replaceFragment(currentCardNote)
     }
 
-    private void showEmptyNote() {
-        FragmentManager fragmentManager = requireActivity()
-                .getSupportFragmentManager();
-        Fragment detail = fragmentManager.findFragmentById(R.id.fragment_note);
-
+    private fun showEmptyNote() {
+        val fragmentManager = requireActivity()
+                .supportFragmentManager
+        val detail = fragmentManager.findFragmentById(R.id.fragment_note)
         if (detail != null) {
-            FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-            fragmentTransaction.remove(detail);
-            fragmentTransaction.commit();
+            val fragmentTransaction = fragmentManager.beginTransaction()
+            fragmentTransaction.remove(detail)
+            fragmentTransaction.commit()
         }
     }
 
-    private boolean onItemSelected(int menuItem) {
-        switch (menuItem) {
-            case R.id.action_add:
-                addFragment(CardFragment.newInstance(), true);
-                publisher.subscribe(new Observer() {
-                    @Override
-                    public void updateCardNote(CardNote cardNote) {
-                        data.addCardNote(cardNote);
-                        adapter.notifyItemInserted(data.size() - 1);
-                        moveToFirstPosition = true;
+    private fun onItemSelected(menuItem: Int): Boolean {
+        when (menuItem) {
+            R.id.action_add -> {
+                addFragment(CardFragment.newInstance(), true)
+                publisherTitle!!.subscribe(object : Observer {
+                    override fun updateCardNote(cardNote: CardNote?) {
+                        data!!.addCardNote(cardNote)
+                        adapter!!.notifyItemInserted(data!!.size() - 1)
+                        moveToFirstPosition = true
                     }
-                });
-                return true;
-            case R.id.action_update:
-                int updatePosition = adapter.getMenuPosition();
-                addFragment(CardFragment.newInstance(data.getNoteData(updatePosition)), true);
-                publisher.subscribe(new Observer() {
-                    @Override
-                    public void updateCardNote(CardNote cardNote) {
-                        data.updateCardNote(updatePosition, cardNote);
-                        adapter.notifyItemChanged(updatePosition);
+                })
+                return true
+            }
+            R.id.action_update -> {
+                val updatePosition = adapter!!.menuPosition
+                addFragment(newInstance(data!!.getNoteData(updatePosition)), true)
+                publisherTitle!!.subscribe(object : Observer {
+                    override fun updateCardNote(cardNote: CardNote?) {
+                        data!!.updateCardNote(updatePosition, cardNote)
+                        adapter!!.notifyItemChanged(updatePosition)
                     }
-                });
-                showEmptyNote();
-                return true;
-            case R.id.action_delete:
-                int deletePosition = adapter.getMenuPosition();
-                openDeleteDialog(deletePosition);
-                return true;
-            case R.id.action_clear:
-                openClearDialog();
-                return true;
+                })
+                showEmptyNote()
+                return true
+            }
+            R.id.action_delete -> {
+                val deletePosition = adapter!!.menuPosition
+                openDeleteDialog(deletePosition)
+                return true
+            }
+            R.id.action_clear -> {
+                openClearDialog()
+                return true
+            }
         }
-        return false;
+        return false
     }
 
-    private void openDeleteDialog(int deletePosition) {
-        AlertDialog.Builder deleteDialog = new AlertDialog.Builder(activity);
+    private fun openDeleteDialog(deletePosition: Int) {
+        val deleteDialog = AlertDialog.Builder(activity)
         deleteDialog.setTitle(R.string.exclamation)
                 .setMessage(R.string.delete_question)
                 .setIcon(R.drawable.ic_baseline_alert)
                 .setCancelable(false)
-                .setNegativeButton(R.string.text_no, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        Toast.makeText(activity, R.string.text_no_, Toast.LENGTH_SHORT).show();
-                    }
-                })
-                .setPositiveButton(R.string.text_yes, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        Toast.makeText(activity, R.string.text_yes_, Toast.LENGTH_SHORT).show();
-                        data.deleteCardNote(deletePosition);
-                        adapter.notifyItemRemoved(deletePosition);
-                        showEmptyNote();
-                    }
-                });
-        AlertDialog alert = deleteDialog.create();
-        alert.show();
+                .setNegativeButton(R.string.text_no) { dialog, id -> Toast.makeText(activity, R.string.text_no_, Toast.LENGTH_SHORT).show() }
+                .setPositiveButton(R.string.text_yes) { dialog, id ->
+                    Toast.makeText(activity, R.string.text_yes_, Toast.LENGTH_SHORT).show()
+                    data!!.deleteCardNote(deletePosition)
+                    adapter!!.notifyItemRemoved(deletePosition)
+                    showEmptyNote()
+                }
+        val alert = deleteDialog.create()
+        alert.show()
     }
 
-    private void openClearDialog() {
-        AlertDialog.Builder clearDialog = new AlertDialog.Builder(activity);
+    private fun openClearDialog() {
+        val clearDialog = AlertDialog.Builder(activity)
         clearDialog.setTitle(R.string.exclamation)
                 .setMessage(R.string.clear_question)
                 .setIcon(R.drawable.ic_baseline_alert)
                 .setCancelable(false)
-                .setNegativeButton(R.string.text_no, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        Toast.makeText(activity, R.string.text_no_, Toast.LENGTH_SHORT).show();
-                    }
-                })
-                .setPositiveButton(R.string.text_yes, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        Toast.makeText(activity, R.string.text_yes_, Toast.LENGTH_SHORT).show();
-                        data.clearCardNote();
-                        adapter.notifyDataSetChanged();
-                        showEmptyNote();
-                    }
-                });
-        AlertDialog alert = clearDialog.create();
-        alert.show();
+                .setNegativeButton(R.string.text_no) { dialog, id -> Toast.makeText(activity, R.string.text_no_, Toast.LENGTH_SHORT).show() }
+                .setPositiveButton(R.string.text_yes) { dialog, id ->
+                    Toast.makeText(activity, R.string.text_yes_, Toast.LENGTH_SHORT).show()
+                    data!!.clearCardNote()
+                    adapter!!.notifyDataSetChanged()
+                    showEmptyNote()
+                }
+        val alert = clearDialog.create()
+        alert.show()
     }
 
-    private void addFragment(Fragment fragment, boolean useBackStack) {
-        FragmentManager fragmentManager = requireActivity().getSupportFragmentManager();
-        Fragment currentFragment = fragmentManager.findFragmentById(R.id.fragment_container);
-        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-
+    private fun addFragment(fragment: Fragment, useBackStack: Boolean) {
+        val fragmentManager = requireActivity().supportFragmentManager
+        val currentFragment = fragmentManager.findFragmentById(R.id.fragment_container)
+        val fragmentTransaction = fragmentManager.beginTransaction()
         if (currentFragment != null) {
-            fragmentTransaction.remove(currentFragment);
+            fragmentTransaction.remove(currentFragment)
         }
-        fragmentTransaction.add(R.id.fragment_container, fragment);
-
+        fragmentTransaction.add(R.id.fragment_container, fragment)
         if (useBackStack) {
-            int count = fragmentManager.getBackStackEntryCount();
+            val count = fragmentManager.backStackEntryCount
             if (count == 0) {
-                fragmentTransaction.addToBackStack(null);
+                fragmentTransaction.addToBackStack(null)
             }
         }
-        fragmentTransaction.commit();
+        fragmentTransaction.commit()
     }
 
-    private void replaceFragment(CardNote currentCardNote) {
-        FragmentManager fragmentManager = requireActivity().getSupportFragmentManager();
-        NoteFragment detail = NoteFragment.newInstance(currentCardNote);
-        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-        Fragment currentFragment = fragmentManager.findFragmentById(R.id.fragment_container);
-
-        fragmentTransaction.remove(currentFragment);
-
-        fragmentTransaction.add(R.id.fragment_container, detail);
-
-        int count = fragmentManager.getBackStackEntryCount();
+    private fun replaceFragment(currentCardNote: CardNote) {
+        val fragmentManager = requireActivity().supportFragmentManager
+        val detail = NoteFragment.newInstance(currentCardNote)
+        val fragmentTransaction = fragmentManager.beginTransaction()
+        val currentFragment = fragmentManager.findFragmentById(R.id.fragment_container)
+        fragmentTransaction.remove(currentFragment!!)
+        fragmentTransaction.add(R.id.fragment_container, detail)
+        val count = fragmentManager.backStackEntryCount
         if (count == 0) {
-            fragmentTransaction.addToBackStack(null);
+            fragmentTransaction.addToBackStack(null)
         }
+        fragmentTransaction.commit()
+    }
 
-        fragmentTransaction.commit();
+    companion object {
+        private const val MY_DEFAULT_DURATION = 1000
+        const val CURRENT_NOTE = "CurrentNote"
+        fun newInstance(): TitleFragment {
+            return TitleFragment()
+        }
     }
 }
