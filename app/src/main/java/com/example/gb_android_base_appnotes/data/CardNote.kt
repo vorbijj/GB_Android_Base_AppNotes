@@ -10,17 +10,15 @@ data class CardNote(var title: String?, var date: Date, var description: String?
 
     constructor(parcel: Parcel) : this(
             parcel.readString(),
-            parcel.readLong() as Date,
+            Date(parcel.readLong()),
             parcel.readString(),
-            parcel.readByte() != 0.toByte()) {
-        id = parcel.readString()
-    }
+            parcel.readByte() != 0.toByte())
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {
         parcel.writeString(title)
+        parcel.writeLong(date.time)
         parcel.writeString(description)
         parcel.writeByte(if (isLike) 1 else 0)
-        parcel.writeString(id)
     }
 
     override fun describeContents(): Int {
